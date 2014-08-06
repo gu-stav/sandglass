@@ -1,4 +1,4 @@
-express = require 'express'
+express = require( 'express' )
 
 module.exports = ( app ) ->
   router = express.Router()

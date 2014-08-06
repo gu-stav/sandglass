@@ -1,4 +1,4 @@
-express = require ( 'express' )
+express = require( 'express' )
 rest = require( 'restler' )
 
 module.exports = ( app ) ->
