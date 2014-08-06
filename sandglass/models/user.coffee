@@ -50,18 +50,18 @@ module.exports = ( sequelize, DataTypes ) ->
           this.find( search )
             .then( resolve, reject )
 
-      post: ( data ) ->
-        new Promise ( resolve, reject ) =>
-          rawPassword = data._rawPassword
+      post: ( req ) ->
+        data = req.body
 
-          if not rawPassword
+        new Promise ( resolve, reject ) =>
+          if not data._rawPassword
             throw new Error( '_rawPassword was not provided.' )
 
           bcrypt.genSalt 12, ( err, salt ) =>
             if err
               throw new Error( err )
 
-            bcrypt.hash rawPassword, salt, ( err, hash ) =>
+            bcrypt.hash data._rawPassword, salt, ( err, hash ) =>
               if err
                 throw new Error( err )
 

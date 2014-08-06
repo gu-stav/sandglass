@@ -27,9 +27,9 @@ module.exports = ( sequelize, DataTypes ) ->
 
       post: ( req ) ->
         return new Promise ( resolve, reject ) =>
-          start = new Date()
-          end = start
-          description = req.body.description
+          start = req.body.start or new Date()
+          end = req.body.end or undefined
+          description = req.body.description or ''
           title = req.body.title
 
           create =

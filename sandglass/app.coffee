@@ -69,12 +69,21 @@ class Sandglass
   setupFixtures: ->
     new Promise ( resolve, reject ) =>
       role =
-        name: 'Admin'
-        default: true
-        admin: true
+        body:
+          name: 'Admin'
+          default: true
+          admin: true
+
+      user =
+        body:
+          email: 'gustavpursche@gmail.com'
+          _rawPassword: 'test'
+          name: 'Testuser'
 
       @models.Role
-        .create( role )
+        .post( role )
+        .then ( role ) =>
+          @models.User.post( user )
         .then( resolve, reject )
 
   mount: ( routes ) ->
