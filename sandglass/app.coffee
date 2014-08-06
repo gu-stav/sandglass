@@ -3,6 +3,7 @@ bodyParser = require( 'body-parser')
 cookieParser = require('cookie-parser')
 express = require( 'express' )
 Promise = require( 'bluebird' )
+rest = require( 'restler' )
 Sequelize = require( 'sequelize' )
 
 class Sandglass
@@ -13,9 +14,11 @@ class Sandglass
       server:
         port: 3000
 
+      api:
+        base: '/api/0.1'
+
       frontend:
-        api:
-          host: 'http://localhost:3000/'
+        host: 'http://localhost:3000/api/0.1'
         cookie:
           name: 'auth'
           options:
@@ -43,19 +46,65 @@ class Sandglass
   setupViews: ->
     @app.set( 'view engine', 'jade' )
     @app.set( 'views', __dirname + '/views' );
-    @app.use( bodyParser.urlencoded( { extended: true } ) )
+
+    # auth middleware
+    @app.sessionAuth = ( req, res, next ) =>
+      failed = false
+
+      if not req.cookies?
+        failed = true
+      else
+        session = req.cookies[ @app.options.frontend.cookie.name ]
+
+      if not session
+        failed = true
+
+      if failed
+        return res.status( 403 ).end()
+
+      rest.get( @app.options.frontend.host + '/sessions/' + session )
+        .on 'complete', ( jres, err ) ->
+
+          if not jres or not jres.users
+            return res.status( 403 ).end()
+
+          req.user = jres.users[ 0 ]
+          next()
 
     @mount( require( './routes/index' )( @app ) )
 
   setupAPI: ->
     @app.API_VERSION = '0.1'
+
+    # initialize response object
+    @app.use ( req, res, next ) ->
+      # hold collected data
+      res.data = []
+      # hold collected errors
+      res.errors = []
+      # success handler
+      res.success = ( data ) ->
+        if data
+          res.data.push( data )
+          next()
+
+      # error handler
+      res.error = ( err ) ->
+        if err
+          res.errors.push( err );
+          next()
+
+      next()
+
     @mount( require( './routes/api/index' )( @app ) )
 
-    @app.use( bodyParser.json() )
-
-    @app.error = ( res, err ) ->
-      console.log( err )
-      res.send( err )
+    # execute response
+    @app.all '/api/*', ( req, res, next ) ->
+      if res.data
+        if( res.data.length is 1 )
+          res.json( res.data[ 0 ] )
+        else
+          res.json( res.data )
 
   setupModels: ->
     models = require( './models/index' )( @app.db )
@@ -94,12 +143,14 @@ class Sandglass
     @setupDatabase()
     @setupModels()
 
+    @app.use( bodyParser.urlencoded( { extended: true } ) )
+    @app.use( bodyParser.json() )
     @app.use( cookieParser() )
+
+    @setupAPI()
 
     if not @options.headless
       @setupViews()
-
-    @setupAPI()
 
     @app.db.sync()
       .then =>

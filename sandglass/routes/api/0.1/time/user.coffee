@@ -1,12 +1,16 @@
 express = require 'express'
 
 module.exports = ( app ) ->
-  router = express.Router()
+  express.Router()
+    .get app.options.api.base + '/users', ( req, res, next ) ->
+      app.models.User.get( req )
+        .then( res.success, res.error )
 
-  listUsers = ( req, res, next ) ->
-    app.models.user.signup( req )
+    .get app.options.api.base + '/users/:userId', ( req, res, next ) ->
+      app.models.User.get( req, req.param( 'userId' ) )
+        .then( res.success, res.error )
 
-  router
-    .get( '/users', listUsers )
-
-  router
+    .post app.options.api.base + '/users', ( req, res, next ) ->
+      console.log( req.body )
+      app.models.User.post( req )
+        .then( res.success, res.error )

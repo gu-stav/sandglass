@@ -1,18 +1,12 @@
 express = require( 'express' )
+rest = require( 'restler' )
 
 module.exports = ( app ) ->
   router = express.Router()
-
-  router
     .get '/signup', ( req, res, next ) ->
       res.render 'signup'
 
     .post '/signup', ( req, res, next ) ->
-      app.models.User.post( req.body )
-        .then ( user ) ->
-          renderedUser = user.render()
-          res.json( renderedUser )
-        .catch ( err ) ->
-          app.error( err, res )
-
-  router
+      rest.post( app.options.frontend.host + '/users', data: req.body )
+        .on 'complete', ( jres, err ) ->
+          res.redirect( '/signup' )

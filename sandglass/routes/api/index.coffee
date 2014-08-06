@@ -1,18 +1,10 @@
-_ = require 'lodash'
-
 module.exports = ( app ) ->
   login = require( './login' )( app )
-  signup = require( './signup' )( app )
-  time = require( './' + app.API_VERSION + '/time/index' )( app )
+  api_session = require( './session' )( app )
+  api_user = require( './0.1/time/user' )( app )
+  api_activity = require( './0.1/time/activity' )( app )
 
-  # require auth on every url, which contains the userId-Parameter
-  app.param 'userId', ( req, res, next, id ) ->
-    app.models.User.load( id )
-      .then ( user ) =>
-        if not user
-          return res.status( 403 ).end()
-
-        req.user = user
-        next()
-
-  [ login, signup ]
+  [ login,
+    api_session,
+    api_user,
+    api_activity, ]

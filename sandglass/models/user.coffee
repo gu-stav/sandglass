@@ -40,6 +40,8 @@ module.exports = ( sequelize, DataTypes ) ->
 
         @.belongsTo( models.Role )
         @.hasOne( models.Activity )
+        @.hasOne( models.Project )
+        @.hasOne( models.Task )
 
       findBySession: ( session ) ->
         new Promise ( resolve, reject ) =>
@@ -48,7 +50,11 @@ module.exports = ( sequelize, DataTypes ) ->
               session: session
 
           this.find( search )
-            .then( resolve, reject )
+            .then ( user ) ->
+              if not user
+                reject( new Error( 'User not found' ) )
+              else
+                resolve( users: [ user.render() ] )
 
       post: ( req ) ->
         data = req.body
@@ -77,7 +83,26 @@ module.exports = ( sequelize, DataTypes ) ->
                       .then ( role ) =>
                         user.setRole( role )
                           .then( resolve, reject )
-                .then( resolve, reject )
+                .then ( user ) ->
+                  resolve( users: [ user.render() ] )
+
+      get: ( req, id ) ->
+        new Promise ( resolve, reject ) =>
+          if id
+            @.find( id )
+            .then ( user ) ->
+              if not user
+                reject( new Error( 'User not found' ) )
+
+              resolve( users: [ user.render() ] )
+          else
+            @.findAll()
+              .then ( users ) =>
+                result = []
+                for index, user of users
+                  result.push( user.render() )
+
+                resolve( users: result )
 
       logout: ( session ) ->
         new Promise ( resolve, reject ) =>
@@ -92,10 +117,10 @@ module.exports = ( sequelize, DataTypes ) ->
               user.updateAttributes( update )
                 .then( resolve, reject )
 
-      login: ( data ) ->
+      login: ( req ) ->
         new Promise ( resolve, reject ) =>
-          password = data.password
-          email = data.email
+          password = req.body.password
+          email = req.body.email
 
           if not password
             throw new Error( 'No password was provided' )
@@ -106,7 +131,7 @@ module.exports = ( sequelize, DataTypes ) ->
           search =
             where:
               email: email
-
+          console.log( 'LOGIN', search )
           @.find( search )
             .then ( user ) =>
               if not user
@@ -115,7 +140,7 @@ module.exports = ( sequelize, DataTypes ) ->
               if user.session
                 # user is already logged in, so we don't need to create
                 # a new session string
-                return resolve( user )
+                return resolve( users: [ user.render() ] )
 
               bcrypt.compare password, user.password, ( err, res ) =>
                 if err
@@ -133,7 +158,8 @@ module.exports = ( sequelize, DataTypes ) ->
                   session: session
 
                 user.updateAttributes( update )
-                  .then( resolve, reject )
+                  .then ( user ) ->
+                    resolve( users: [ user.render() ] )
 
     instanceMethods:
       render: ( password = false, salt = false ) ->
@@ -145,7 +171,7 @@ module.exports = ( sequelize, DataTypes ) ->
         if not salt
           omit.push( 'salt' )
 
-        return user: _.omit( @.dataValues, omit )
+        return _.omit( @.dataValues, omit )
     }
 
   )
