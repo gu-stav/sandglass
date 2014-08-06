@@ -22,6 +22,9 @@ module.exports = ( sequelize, DataTypes ) ->
       associate: ( models )->
         @.hasMany( models.User )
 
+      post: ( req ) ->
+        @.create( req.body )
+
       getDefault: ->
         where =
           default: true

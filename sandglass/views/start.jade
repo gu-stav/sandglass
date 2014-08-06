@@ -6,3 +6,23 @@ block header
   a(href="/logout") Logout
 
 block content
+
+  h2 Create activity
+  form( action="/activity", method="post" )
+    div.form-group
+      label Title
+      input( type="text", name="title" )
+    div.form-group
+      label Description
+      input( type="text", name="description" )
+    div.form-group
+      button( type="submit" ) Submit
+
+  h2 Activities
+  ul
+  each activity in activities
+    li
+      strong= activity.title
+      div= activity.description
+      div= activity.start
+      div= activity.end

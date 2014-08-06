@@ -39,6 +39,7 @@ module.exports = ( sequelize, DataTypes ) ->
           Role: models.Role
 
         @.belongsTo( models.Role )
+        @.hasOne( models.Activity )
 
       findBySession: ( session ) ->
         new Promise ( resolve, reject ) =>
@@ -49,7 +50,7 @@ module.exports = ( sequelize, DataTypes ) ->
           this.find( search )
             .then( resolve, reject )
 
-      signup: ( data ) ->
+      post: ( data ) ->
         new Promise ( resolve, reject ) =>
           rawPassword = data._rawPassword
 
@@ -144,7 +145,7 @@ module.exports = ( sequelize, DataTypes ) ->
         if not salt
           omit.push( 'salt' )
 
-        return user: _.omit( @.toJSON(), omit )
+        return user: _.omit( @.dataValues, omit )
     }
 
   )

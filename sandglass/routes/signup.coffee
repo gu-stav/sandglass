@@ -1,4 +1,4 @@
-express = require 'express'
+express = require( 'express' )
 
 module.exports = ( app ) ->
   router = express.Router()
@@ -8,10 +8,7 @@ module.exports = ( app ) ->
       res.render 'signup'
 
     .post '/signup', ( req, res, next ) ->
-      resp =
-      app.models.User.signup( req.body )
-
-      resp
+      app.models.User.post( req.body )
         .then ( user ) ->
           renderedUser = user.render()
           res.json( renderedUser )

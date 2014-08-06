@@ -14,10 +14,12 @@ class Sandglass
         port: 3000
 
       frontend:
+        api:
+          host: 'http://localhost:3000/'
         cookie:
           name: 'auth'
           options:
-            expires: new Date( Date.now() + 900000 )
+            expires: new Date( Date.now() + 1000 * 60 * 60 * 24 )
             httpOnly: true
 
       db:

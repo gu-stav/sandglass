@@ -26,8 +26,12 @@ module.exports = ( app ) ->
             throw new Error( 'User was not found' )
 
           data = user.render()
+          req.user = user
 
-          res.render( 'start', data )
+          app.models.Activity.get( req )
+            .then ( activities ) ->
+              data.activities = activities
+              res.render( 'start', data )
         .catch ( err ) ->
           app.error( res, err )
 
