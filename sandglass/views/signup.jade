@@ -1,0 +1,28 @@
+extends master
+
+block content
+
+  h2 Signup
+  form( action="/signup", method="post" )
+    div.form-group
+      label Email
+      input( type="text", name="email" )
+    div.form-group
+      label Name
+      input( type="text", name="name" )
+    div.form-group
+      label Password
+      input( type="password", name="_rawPassword" )
+    div.form-group
+      button( type="submit" ) Signup
+
+  h2 Login
+  form( action="/login", method="post" )
+    div.form-group
+      label Email
+      input( type="text", name="email" )
+    div.form-group
+      label Password
+      input( type="password", name="password" )
+    div.form-group
+      button( type="submit" ) Login
