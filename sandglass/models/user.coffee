@@ -35,6 +35,10 @@ module.exports = ( sequelize, DataTypes ) ->
     {
     classMethods:
       associate: ( models )->
+        @.__models =
+          Role: models.Role
+
+        @.belongsTo( models.Role )
 
       findBySession: ( session ) ->
         new Promise ( resolve, reject ) =>
@@ -63,6 +67,15 @@ module.exports = ( sequelize, DataTypes ) ->
               data.password = hash
 
               @.create( data )
+                .then ( user ) =>
+                  if not user
+                    throw new Error( 'No user created' )
+
+                  new Promise ( resolve, reject ) =>
+                    @.__models.Role.getDefault()
+                      .then ( role ) =>
+                        user.setRole( role )
+                          .then( resolve, reject )
                 .then( resolve, reject )
 
       logout: ( session ) ->

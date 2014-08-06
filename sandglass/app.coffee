@@ -2,6 +2,7 @@ _ = require( 'lodash' )
 bodyParser = require( 'body-parser')
 cookieParser = require('cookie-parser')
 express = require( 'express' )
+Promise = require( 'bluebird' )
 Sequelize = require( 'sequelize' )
 
 class Sandglass
@@ -57,11 +58,22 @@ class Sandglass
   setupModels: ->
     models = require( './models/index' )( @app.db )
 
-    for model in models
+    for index, model of models
       if( model.associate? )
         model.associate( models )
 
-    @app.models = models
+    @app.models = @models = models
+
+  setupFixtures: ->
+    new Promise ( resolve, reject ) =>
+      role =
+        name: 'Admin'
+        default: true
+        admin: true
+
+      @models.Role
+        .create( role )
+        .then( resolve, reject )
 
   mount: ( routes ) ->
     for router in routes
@@ -79,6 +91,8 @@ class Sandglass
     @setupAPI()
 
     @app.db.sync()
+      .then =>
+        @setupFixtures()
       .then =>
         @app.listen @options.server.port
 
