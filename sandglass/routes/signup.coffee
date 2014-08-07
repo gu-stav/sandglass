@@ -7,6 +7,6 @@ module.exports = ( app ) ->
       res.render 'signup'
 
     .post '/signup', ( req, res, next ) ->
-      rest.post( app.options.frontend.host + '/users', data: req.body )
+      rest.post( app.options.host + '/users', data: req.body )
         .on 'complete', ( jres, err ) ->
           res.redirect( '/signup' )

@@ -11,7 +11,7 @@ module.exports = ( app ) ->
       if not req.cookies?
         failed = true
       else
-        session = req.cookies[ app.options.frontend.cookie.name ]
+        session = req.cookies[ app.options.cookie.name ]
 
       if not session
         failed = true
@@ -25,7 +25,7 @@ module.exports = ( app ) ->
           if not user
             throw new Error( 'User was not found' )
 
-          cookieName = app.options.frontend.cookie.name
+          cookieName = app.options.cookie.name
           res.clearCookie( cookieName )
           res.redirect( '/' )
         .catch ( err ) ->

@@ -8,22 +8,29 @@ Sequelize = require( 'sequelize' )
 
 class Sandglass
   constructor: ( options ) ->
-    @defaults =
+    defaults =
       headless: false
-
-      server:
-        port: 3000
+      fixtures: true
 
       api:
         base: '/api/0.1'
-
-      frontend:
-        host: 'http://localhost:3000/api/0.1'
         cookie:
           name: 'auth'
           options:
             expires: new Date( Date.now() + 1000 * 60 * 60 * 24 )
             httpOnly: true
+        server:
+          port: 3000
+
+      frontend:
+        cookie:
+          name: 'auth'
+          options:
+            expires: new Date( Date.now() + 1000 * 60 * 60 * 24 )
+            httpOnly: true
+        host: 'http://localhost:3000/api/0.1'
+        server:
+          port: 3001
 
       db:
         name: ''
@@ -34,27 +41,34 @@ class Sandglass
           dialect: 'sqlite'
           storage: 'sandglass.sqlite'
 
-    @app = express()
-    @app.options = @options = _.defaults( @defaults, options )
+    @options = _.defaults( defaults, options )
 
-  setupDatabase: ->
-    @app.db = new Sequelize( @options.db.name,
-                             @options.db.username,
-                             @options.db.password,
-                             @options.db.options )
+  setupDatabase: () ->
+    new Sequelize( @options.db.name,
+                   @options.db.username,
+                   @options.db.password,
+                   @options.db.options )
 
-  setupViews: ->
-    @app.set( 'view engine', 'jade' )
-    @app.set( 'views', __dirname + '/views' );
+  setupViews: ( app ) ->
+    app.set( 'view engine', 'jade' )
+    app.set( 'views', __dirname + '/views' )
+
+    app.options = @options.frontend
+    @setupMiddleware( app, true )
+
+    # define basic storage
+    app.use ( req, res, next ) ->
+      res.data = {}
+      next()
 
     # auth middleware
-    @app.sessionAuth = ( req, res, next ) =>
+    app.sessionAuth = ( req, res, next ) =>
       failed = false
 
       if not req.cookies?
         failed = true
       else
-        session = req.cookies[ @app.options.frontend.cookie.name ]
+        session = req.cookies[ app.options.cookie.name ]
 
       if not session
         failed = true
@@ -62,22 +76,28 @@ class Sandglass
       if failed
         return res.status( 403 ).end()
 
-      rest.get( @app.options.frontend.host + '/sessions/' + session )
+      rest.get( app.options.host + '/sessions/' + session )
         .on 'complete', ( jres, err ) ->
 
           if not jres or not jres.users
             return res.status( 403 ).end()
 
-          req.user = jres.users[ 0 ]
+          _.assign( res.data.user, jres.users[ 0 ] )
           next()
 
-    @mount( require( './routes/index' )( @app ) )
+    @mount( app, require( './routes/index' )( app ) )
+    return app
 
-  setupAPI: ->
-    @app.API_VERSION = '0.1'
+  setupAPI: ( app ) ->
+    app.options = @options.api
+
+    app.db = @setupDatabase( app )
+    app.models = @setupModels( app.db )
+
+    @setupMiddleware( app )
 
     # initialize response object
-    @app.use ( req, res, next ) ->
+    app.use ( req, res, next ) ->
       # hold collected data
       res.data = []
       # hold collected errors
@@ -96,26 +116,43 @@ class Sandglass
 
       next()
 
-    @mount( require( './routes/api/index' )( @app ) )
+    # always preload user, when user-id is involved
+    app.param 'userId', ( req, res, next, userId ) ->
+      next()
+
+    @mount( app, require( './routes/api/index' )( app ) )
 
     # execute response
-    @app.all '/api/*', ( req, res, next ) ->
+    app.all '*', ( req, res, next ) ->
       if res.data
         if( res.data.length is 1 )
           res.json( res.data[ 0 ] )
         else
           res.json( res.data )
 
-  setupModels: ->
-    models = require( './models/index' )( @app.db )
+    return app
 
+  # Sequelize-Models
+  setupModels: ( db ) ->
+    models = require( './models/index' )( db )
+
+    # automatically create associations between models
     for index, model of models
       if( model.associate? )
         model.associate( models )
 
-    @app.models = @models = models
+    return models
 
-  setupFixtures: ->
+  # Middlewares used by both apps
+  setupMiddleware: ( app, url = false ) ->
+    if url
+      app.use( bodyParser.urlencoded( { extended: true } ) )
+
+    app.use( bodyParser.json() )
+    app.use( cookieParser() )
+
+  # API-Fixtures
+  setupFixtures: ( app )->
     new Promise ( resolve, reject ) =>
       role =
         body:
@@ -129,33 +166,32 @@ class Sandglass
           _rawPassword: 'test'
           name: 'Testuser'
 
-      @models.Role
+      app.models.Role
         .post( role )
         .then ( role ) =>
-          @models.User.post( user )
+          app.models.User.post( user )
         .then( resolve, reject )
 
-  mount: ( routes ) ->
+  # mount express.Router()
+  mount: ( app, routes ) ->
     for router in routes
-      @app.use router
+      app.use router
 
+  # start application
   start: () ->
-    @setupDatabase()
-    @setupModels()
-
-    @app.use( bodyParser.urlencoded( { extended: true } ) )
-    @app.use( bodyParser.json() )
-    @app.use( cookieParser() )
-
-    @setupAPI()
-
+    console.log( @options )
     if not @options.headless
-      @setupViews()
+      app_frontend = @setupViews( express() )
+      app_frontend.listen( app_frontend.options.server.port )
 
-    @app.db.sync()
+    app_api = @setupAPI( express() )
+
+    app_api.db.sync()
       .then =>
-        @setupFixtures()
-      .then =>
-        @app.listen @options.server.port
+        console.log( @options )
+        if @options.fixtures
+          @setupFixtures( app_api )
+      .then ->
+        app_api.listen( app_api.options.server.port )
 
 module.exports = Sandglass

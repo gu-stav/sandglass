@@ -1,15 +1,13 @@
+_ = require( 'lodash' )
 express = require( 'express' )
 rest = require( 'restler' )
 
 module.exports = ( app ) ->
   router = express.Router()
     .get '/', [ app.sessionAuth ], ( req, res, next ) ->
-      data =
-        user: req.user
-        activities: []
-
-      rest.get( app.options.frontend.host + '/users/' + req.user.id + '/activities' )
+      rest
+        .get( app.options.host + '/users/' + req.user.id + '/activities' )
         .on 'complete', ( jres, err )
-          data.activities = jres.activities
+          _.assign( res.data, jres )
 
-          res.render( 'start', data )
+          res.render( 'start', res.data )

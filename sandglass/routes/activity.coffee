@@ -7,8 +7,8 @@ module.exports = ( app ) ->
       data =
         data: req.body
       headers:
-        'Cookie': 'auth=' + req.user.session
+        'Cookie': 'auth=' + res.data.user.session
 
-      rest.post( app.options.frontend.host + '/users/' + req.user.id + '/activities', data )
+      rest.post( app.options.host + '/users/' + res.data.user.id + '/activities', data )
         .on 'complete', ( jres ) ->
           res.redirect( '/' )
