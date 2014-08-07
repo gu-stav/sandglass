@@ -5,7 +5,7 @@ module.exports = ( app ) ->
   router = express.Router()
     .post '/login', ( req, res, next ) ->
       rest.post( app.options.host + '/login', data: req.body )
-        .on 'complete', ( jres, err ) ->
+        .on 'success', ( jres ) ->
           user = jres.users[ 0 ]
           session = user.session
 

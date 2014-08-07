@@ -13,4 +13,4 @@ module.exports = ( db ) ->
       model = db.import( path.join( __dirname, file ) )
       models[ model.name ] = model
 
-  models
+  return models

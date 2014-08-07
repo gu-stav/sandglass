@@ -5,9 +5,9 @@ rest = require( 'restler' )
 module.exports = ( app ) ->
   router = express.Router()
     .get '/', [ app.sessionAuth ], ( req, res, next ) ->
-      rest
-        .get( app.options.host + '/users/' + req.user.id + '/activities' )
-        .on 'complete', ( jres, err )
-          _.assign( res.data, jres )
-
-          res.render( 'start', res.data )
+      #rest
+      #  .get( app.options.host + '/users/' + req.user.id + '/activities' )
+      #  .on 'complete', ( jres, err )
+      #    _.assign( res.data, jres )
+      res.data.activities = []
+      res.render( 'start', res.data )

@@ -50,11 +50,11 @@ class Sandglass
                    @options.db.options )
 
   setupViews: ( app ) ->
+    app.options = @options.frontend
+    @setupMiddleware( app )
+
     app.set( 'view engine', 'jade' )
     app.set( 'views', __dirname + '/views' )
-
-    app.options = @options.frontend
-    @setupMiddleware( app, true )
 
     # define basic storage
     app.use ( req, res, next ) ->
@@ -77,12 +77,11 @@ class Sandglass
         return res.status( 403 ).end()
 
       rest.get( app.options.host + '/sessions/' + session )
-        .on 'complete', ( jres, err ) ->
-
+        .on 'success', ( jres ) ->
           if not jres or not jres.users
             return res.status( 403 ).end()
 
-          _.assign( res.data.user, jres.users[ 0 ] )
+          res.data.user = jres.users[ 0 ]
           next()
 
     @mount( app, require( './routes/index' )( app ) )
@@ -144,12 +143,11 @@ class Sandglass
     return models
 
   # Middlewares used by both apps
-  setupMiddleware: ( app, url = false ) ->
-    if url
-      app.use( bodyParser.urlencoded( { extended: true } ) )
-
-    app.use( bodyParser.json() )
+  setupMiddleware: ( app ) ->
     app.use( cookieParser() )
+
+    app.use( bodyParser.urlencoded( { extended: true } ) )
+    app.use( bodyParser.json() )
 
   # API-Fixtures
   setupFixtures: ( app )->

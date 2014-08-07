@@ -123,15 +123,15 @@ module.exports = ( sequelize, DataTypes ) ->
           email = req.body.email
 
           if not password
-            throw new Error( 'No password was provided' )
+            reject( new Error( 'No password was provided' ) )
 
           if not email
-            throw new Error( 'No email was provided' )
+            reject( Error( 'No email was provided' ) )
 
           search =
             where:
               email: email
-          console.log( 'LOGIN', search )
+
           @.find( search )
             .then ( user ) =>
               if not user
