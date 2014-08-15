@@ -20,10 +20,21 @@ module.exports = ( sequelize, DataTypes ) ->
           create =
             title: req.body.title
 
-          @.create( create )
+          where =
+            where:
+              title: req.body.title
+              userId: req.user.id
+
+          @.find( where )
             .then ( task ) =>
-              task.setUser( req.user )
-            .then( resolve, reject )
+              if task
+                resolve( task )
+              else
+                @.create( create )
+                  .then ( task ) =>
+                    task.setUser( req.user )
+                  .then( resolve, reject )
+
 
       get: ( req, id ) ->
         where =
