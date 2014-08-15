@@ -48,16 +48,10 @@ module.exports = ( sequelize, DataTypes ) ->
           @.create( create )
             .then ( activity ) =>
               if not activity
-                throw new Error( 'Can not create activity' )
+                reject( new Error( 'Can not create activity' ) )
 
               ACTIVITY = activity
-
-              if not req.user
-                throw new Error( 'No user' )
-
               activity.setUser( req.user )
-
-            #TODO: parallel
             .then ( activity ) =>
               post =
                 body:
@@ -65,8 +59,10 @@ module.exports = ( sequelize, DataTypes ) ->
                 user: req.user
 
               @.__models.Task.post( post )
+
             .then ( task ) =>
               ACTIVITY.setTask( task )
+
             .then ( activity ) =>
               post =
                 body:
@@ -74,23 +70,27 @@ module.exports = ( sequelize, DataTypes ) ->
                 user: req.user
 
               @.__models.Project.post( post )
+
             .then ( project ) =>
               ACTIVITY.setProject( project )
 
             .then( resolve, reject )
 
       get: ( req, id ) ->
-        search =
-          where:
-            userId: req.user.id
-          include: [ @.__models.Task, @.__models.Project ]
+        return new Promise ( resolve, reject ) =>
+          user = req.user
 
-        if id?
-          where.id = id
+          search =
+            where:
+              userId: user.id
+            include: [ @.__models.Task, @.__models.Project ]
 
-        @.findAll( search )
-          .then ( activities ) ->
-            resolve( activities: activities )
+          if id?
+            search.where.id = id
+
+          @.findAll( search )
+            .then ( activities ) ->
+              resolve( activities: activities )
     }
 
   )

@@ -1,3 +1,2 @@
-sandglass/**/*.js
 node_modules/
 *.sqlite

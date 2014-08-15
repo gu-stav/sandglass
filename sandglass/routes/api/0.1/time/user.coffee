@@ -11,6 +11,5 @@ module.exports = ( app ) ->
         .then( res.success, res.error )
 
     .post app.options.base + '/users', ( req, res, next ) ->
-      console.log( req.body )
       app.models.User.post( req )
         .then( res.success, res.error )

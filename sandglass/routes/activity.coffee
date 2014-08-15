@@ -6,9 +6,11 @@ module.exports = ( app ) ->
     .post '/activity', [ app.sessionAuth ], ( req, res, next ) ->
       data =
         data: req.body
-      headers:
-        'Cookie': 'auth=' + res.data.user.session
+        headers:
+          'Cookie': 'auth=' + res.data.user.session
 
-      rest.post( app.options.host + '/users/' + res.data.user.id + '/activities', data )
+      url = app.options.host + '/users/' + res.data.user.id + '/activities'
+
+      rest.post( url, data )
         .on 'complete', ( jres ) ->
           res.redirect( '/' )

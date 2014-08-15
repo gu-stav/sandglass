@@ -1,9 +1,9 @@
 module.exports = ( app ) ->
-  login = require( './login' )( app )
-  logout = require( './logout' )( app )
-  start = require( './start' )( app )
-  activity = require( './activity' )( app )
-  signup = require( './signup' )( app )
+  login = require( './login.coffee' )( app )
+  logout = require( './logout.coffee' )( app )
+  start = require( './start.coffee' )( app )
+  activity = require( './activity.coffee' )( app )
+  signup = require( './signup.coffee' )( app )
 
   [ login,
     logout,

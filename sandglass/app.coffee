@@ -10,7 +10,7 @@ class Sandglass
   constructor: ( options ) ->
     defaults =
       headless: false
-      fixtures: true
+      fixtures: process.env.FIXTURES || false
 
       api:
         base: '/api/0.1'
@@ -84,7 +84,7 @@ class Sandglass
           res.data.user = jres.users[ 0 ]
           next()
 
-    @mount( app, require( './routes/index' )( app ) )
+    @mount( app, require( './routes/index.coffee' )( app ) )
     return app
 
   setupAPI: ( app ) ->
@@ -111,15 +111,30 @@ class Sandglass
       res.error = ( err ) ->
         if err
           res.errors.push( err );
-          next()
 
+        next()
       next()
 
     # always preload user, when user-id is involved
-    app.param 'userId', ( req, res, next, userId ) ->
-      next()
+    app.sessionAuth = ( req, res, next ) ->
+      app.models.User.auth( req )
+        .then ( users ) ->
+          if not users
+            return next()
 
-    @mount( app, require( './routes/api/index' )( app ) )
+          user = users.users[0]
+
+          if user
+            req.user = user
+            next()
+          else
+            res.error( new Error( 'Not auth' ) )
+
+        .catch ( err ) ->
+          res.errors.push( err )
+          next()
+
+    @mount( app, require( './routes/api/index.coffee' )( app ) )
 
     # execute response
     app.all '*', ( req, res, next ) ->
@@ -133,7 +148,7 @@ class Sandglass
 
   # Sequelize-Models
   setupModels: ( db ) ->
-    models = require( './models/index' )( db )
+    models = require( './models/index.coffee' )( db )
 
     # automatically create associations between models
     for index, model of models
@@ -177,7 +192,6 @@ class Sandglass
 
   # start application
   start: () ->
-    console.log( @options )
     if not @options.headless
       app_frontend = @setupViews( express() )
       app_frontend.listen( app_frontend.options.server.port )
@@ -186,7 +200,6 @@ class Sandglass
 
     app_api.db.sync()
       .then =>
-        console.log( @options )
         if @options.fixtures
           @setupFixtures( app_api )
       .then ->

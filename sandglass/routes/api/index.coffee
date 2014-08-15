@@ -1,8 +1,8 @@
 module.exports = ( app ) ->
-  login = require( './login' )( app )
-  api_session = require( './session' )( app )
-  api_user = require( './0.1/time/user' )( app )
-  api_activity = require( './0.1/time/activity' )( app )
+  login = require( './login.coffee' )( app )
+  api_session = require( './session.coffee' )( app )
+  api_user = require( './0.1/time/user.coffee' )( app )
+  api_activity = require( './0.1/time/activity.coffee' )( app )
 
   [ login,
     api_session,

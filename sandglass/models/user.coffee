@@ -43,7 +43,9 @@ module.exports = ( sequelize, DataTypes ) ->
         @.hasOne( models.Project )
         @.hasOne( models.Task )
 
-      findBySession: ( session ) ->
+      findBySession: ( session, options ) ->
+        options = _.defaults( options || {}, full: false )
+
         new Promise ( resolve, reject ) =>
           search =
             where:
@@ -54,7 +56,24 @@ module.exports = ( sequelize, DataTypes ) ->
               if not user
                 reject( new Error( 'User not found' ) )
               else
-                resolve( users: [ user.render() ] )
+                if not options.full
+                  resolve( users: [ user.render() ] )
+                else
+                  resolve( users: [ user ] )
+
+      auth: ( req ) ->
+        return new Promise ( resolve, reject ) =>
+          session = req.cookies.auth
+
+          if not session
+            reject( new Error( 'No session was provided' ) )
+
+          @.findBySession( session, { full: true } )
+            .then ( users ) ->
+              if not users or not users.users.length
+                resolve( false )
+              else
+                resolve( users )
 
       post: ( req ) ->
         data = req.body
@@ -126,7 +145,7 @@ module.exports = ( sequelize, DataTypes ) ->
             reject( new Error( 'No password was provided' ) )
 
           if not email
-            reject( Error( 'No email was provided' ) )
+            reject( new Error( 'No email was provided' ) )
 
           search =
             where:
@@ -135,7 +154,7 @@ module.exports = ( sequelize, DataTypes ) ->
           @.find( search )
             .then ( user ) =>
               if not user
-                throw new Error( 'User was not found' )
+                reject( new Error( 'User was not found' ) )
 
               if user.session
                 # user is already logged in, so we don't need to create
@@ -144,10 +163,10 @@ module.exports = ( sequelize, DataTypes ) ->
 
               bcrypt.compare password, user.password, ( err, res ) =>
                 if err
-                  throw new Error( err )
+                  reject( new Error( err ) )
 
                 if not res
-                  throw new Error( 'Passwords do not match' )
+                  reject( new Error( 'Passwords do not match' ) )
 
                 # create new session
                 session = crypto.createHash( 'sha1' )
