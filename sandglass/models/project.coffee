@@ -37,13 +37,17 @@ module.exports = ( sequelize, DataTypes ) ->
                 resolve( project )
 
       get: ( req, id ) ->
-        where =
-          userId: req.user.id
+        return new Promise ( resolve, reject ) =>
+          where =
+            where:
+              UserId: req.user.id
 
-        if id?
-          where.id = id
+          if id?
+            where.where.id = id
 
-        @.findAll( where )
+          @.findAll( where )
+            .then ( projects ) ->
+              resolve( projects: projects )
     }
 
   )
