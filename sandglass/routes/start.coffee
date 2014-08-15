@@ -18,4 +18,5 @@ module.exports = ( app ) ->
         .get( app.options.host + '/users/' + userId + '/activities', data )
         .on 'complete', ( jres, err ) ->
           _.assign( res.data, jres )
+          console.log( jres )
           res.render( 'start', res.data )

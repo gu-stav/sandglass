@@ -123,18 +123,20 @@ module.exports = ( sequelize, DataTypes ) ->
 
                 resolve( users: result )
 
-      logout: ( session ) ->
+      logout: ( req ) ->
         new Promise ( resolve, reject ) =>
+          session = req.cookies.auth;
+
           @.findBySession( session )
             .then ( user ) ->
-              if not user
-                throw new Error( 'User not found' )
-
               update =
-                session: ''
+                session: null
 
               user.updateAttributes( update )
-                .then( resolve, reject )
+                .then ( user ) ->
+                  resolve( users: [ user ] )
+                .catch( reject )
+            .catch( reject )
 
       login: ( req ) ->
         new Promise ( resolve, reject ) =>

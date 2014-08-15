@@ -28,7 +28,9 @@ block content
   ul
   each activity in activities
     li
-      strong= activity.title
+      strong= activity.task.title + ' - '
+      strong= activity.project.title + ' - '
+      strong= activity.title + ' - '
       div= activity.description
       div= activity.start
       div= activity.end

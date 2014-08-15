@@ -1,34 +1,17 @@
 express = require( 'express' )
+rest = require( 'restler' )
 
 module.exports = ( app ) ->
   router = express.Router()
 
   router
-    .get '/logout', ( req, res, next ) ->
-      failed = false
-      data = {}
+    .get '/logout', [ app.sessionAuth ], ( req, res, next ) ->
+      url = app.options.host + '/users/' + res.data.user.id + '/activities'
 
-      if not req.cookies?
-        failed = true
-      else
-        session = req.cookies[ app.options.cookie.name ]
-
-      if not session
-        failed = true
-
-      if failed
-        return res.status( 403 ).end()
-
-      app.models.User
-        .logout( session )
-        .then ( user ) ->
-          if not user
-            throw new Error( 'User was not found' )
-
+      rest.get( url )
+        .on 'complete', ( jres ) ->
           cookieName = app.options.cookie.name
           res.clearCookie( cookieName )
-          res.redirect( '/' )
-        .catch ( err ) ->
-          app.error( res, err )
+          res.redirect( '/signup' )
 
   router
