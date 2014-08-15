@@ -23,7 +23,7 @@ module.exports = ( sequelize, DataTypes ) ->
           where =
             where:
               title: req.body.title
-              userId: req.user.id
+              UserId: req.user.id
 
           @.find( where )
             .then ( task ) =>
@@ -37,13 +37,17 @@ module.exports = ( sequelize, DataTypes ) ->
 
 
       get: ( req, id ) ->
-        where =
-          userId: req.user.id
+        return new Promise ( resolve, reject ) =>
+          where =
+            where:
+              UserId: req.user.id
 
-        if id?
-          where.id = id
+          if id?
+            where.where.id = id
 
-        @.findAll( where )
+          @.findAll( where )
+            .then ( tasks ) ->
+              resolve( tasks: tasks )
     }
 
   )
