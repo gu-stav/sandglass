@@ -5,13 +5,15 @@ module.exports = ( app ) ->
   router = express.Router()
 
   router
-    .get '/logout', [ app.sessionAuth ], ( req, res, next ) ->
-      url = app.options.host + '/users/' + res.data.user.id + '/activities'
+    .get '/logout', ( req, res, next ) ->
+      url = app.options.host + '/logout'
 
-      rest.get( url )
-        .on 'complete', ( jres ) ->
-          cookieName = app.options.cookie.name
-          res.clearCookie( cookieName )
+      data =
+        headers: req.headers
+
+      rest.get( url, data )
+        .on 'complete', ( jres, rres ) ->
+          res.set( rres.headers )
           res.redirect( '/signup' )
 
   router

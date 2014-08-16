@@ -1,5 +1,6 @@
 module.exports = ( app ) ->
   login = require( './login.coffee' )( app )
+  logout = require( './logout.coffee' )( app )
   api_session = require( './session.coffee' )( app )
   api_user = require( './0.1/time/user.coffee' )( app )
   api_activity = require( './0.1/time/activity.coffee' )( app )
@@ -7,6 +8,7 @@ module.exports = ( app ) ->
   api_project = require( './0.1/time/project.coffee' )( app )
 
   [ login,
+    logout,
     api_session,
     api_user,
     api_activity,

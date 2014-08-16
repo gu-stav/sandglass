@@ -34,9 +34,11 @@ module.exports = ( sequelize, DataTypes ) ->
 
     {
     classMethods:
-      associate: ( models )->
+      associate: ( models, app )->
         @.__models =
           Role: models.Role
+
+        @.__app = app
 
         @.belongsTo( models.Role )
         @.hasOne( models.Activity )
@@ -123,22 +125,24 @@ module.exports = ( sequelize, DataTypes ) ->
 
                 resolve( users: result )
 
-      logout: ( req ) ->
+      logout: ( req, response ) ->
         new Promise ( resolve, reject ) =>
           session = req.cookies.auth;
 
+          response.clearCookie( @.__app.options.cookie.name )
+
           @.findBySession( session )
-            .then ( user ) ->
+            .then ( user ) =>
               update =
                 session: null
 
               user.updateAttributes( update )
-                .then ( user ) ->
+                .then ( user ) =>
                   resolve( users: [ user ] )
                 .catch( reject )
             .catch( reject )
 
-      login: ( req ) ->
+      login: ( req, response ) ->
         new Promise ( resolve, reject ) =>
           password = req.body.password
           email = req.body.email
@@ -158,11 +162,6 @@ module.exports = ( sequelize, DataTypes ) ->
               if not user
                 reject( new Error( 'User was not found' ) )
 
-              if user.session
-                # user is already logged in, so we don't need to create
-                # a new session string
-                return resolve( users: [ user.render() ] )
-
               bcrypt.compare password, user.password, ( err, res ) =>
                 if err
                   reject( new Error( err ) )
@@ -179,7 +178,14 @@ module.exports = ( sequelize, DataTypes ) ->
                   session: session
 
                 user.updateAttributes( update )
-                  .then ( user ) ->
+                  .then ( user ) =>
+
+                    # set response cookie
+                    cookieName = @.__app.options.cookie.name
+                    cookieOptions = @.__app.options.cookie.options
+                    session = user.session
+                    response.cookie( cookieName, session, cookieOptions )
+
                     resolve( users: [ user.render() ] )
 
     instanceMethods:

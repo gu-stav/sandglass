@@ -23,11 +23,6 @@ class Sandglass
           port: 3000
 
       frontend:
-        cookie:
-          name: 'auth'
-          options:
-            expires: new Date( Date.now() + 1000 * 60 * 60 * 24 )
-            httpOnly: true
         host: 'http://localhost:3000/api/0.1'
         server:
           port: 3001
@@ -91,7 +86,7 @@ class Sandglass
     app.options = @options.api
 
     app.db = @setupDatabase( app )
-    app.models = @setupModels( app.db )
+    app.models = @setupModels( app.db, app )
 
     @setupMiddleware( app )
 
@@ -147,13 +142,13 @@ class Sandglass
     return app
 
   # Sequelize-Models
-  setupModels: ( db ) ->
+  setupModels: ( db, app ) ->
     models = require( './models/index.coffee' )( db )
 
     # automatically create associations between models
     for index, model of models
       if( model.associate? )
-        model.associate( models )
+        model.associate( models, app )
 
     return models
 
