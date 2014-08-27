@@ -7,10 +7,21 @@ module.exports = function(grunt) {
           'sandglass/static/less/sandglass.less'
         }
       },
+    },
+
+    bower: {
+      dist: {
+        options: {
+          targetDir: 'sandglass/static/bower/',
+          cleanBowerDir: true,
+          verbose: true,
+        }
+      }
     }
   });
 
   require('load-grunt-tasks')(grunt);
 
-  grunt.registerTask( 'build', [ 'less' ] );
+  grunt.registerTask( 'build', [ 'bower',
+                                 'less' ] );
 };
