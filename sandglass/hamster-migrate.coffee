@@ -3,6 +3,7 @@ rest = require( 'restler' )
 sqlite = require( 'sqlite3' )
 
 frontend_conf = require( '../config-frontend.json' )
+api_conf = require( '../config-api.json' )
 
 module.exports = ( username, password, file ) ->
   new Promise ( resolve, reject ) ->
@@ -34,7 +35,7 @@ module.exports = ( username, password, file ) ->
               project: project
               description: description
             headers:
-              'Cookie': 'auth=' + session
+              'Cookie': api_conf.cookie.name + '=' + session
 
           rest.post( activity_url, data )
 
