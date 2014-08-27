@@ -25,6 +25,18 @@ module.exports = function(grunt) {
                'sandglass/static/dist/sandglass.css', ],
         dest: 'sandglass/static/dist/sandglass.css',
       }
+    },
+
+    watch: {
+      less: {
+        files: [ 'sandglass/static/less/*.less' ],
+        tasks: [ 'less',
+                 'concat' ]
+      },
+
+      options: {
+        spawn: false,
+      }
     }
   });
 
