@@ -190,7 +190,13 @@ class Sandglass
           resolve( this )
 
   migrate: ( username, password, file ) ->
-    require( './hamster-migrate.coffee' )( username, password, file )
-    return this
+    new Promise ( resolve, reject ) =>
+      hamster_migrate = require( './hamster-migrate.coffee' )
+
+      if @options.migrations
+        hamster_migrate( username, password, file )
+          .then( resolve, reject )
+
+      resolve( this )
 
 module.exports = Sandglass
