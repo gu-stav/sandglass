@@ -16,10 +16,6 @@ module.exports = ( sequelize, DataTypes ) ->
       type: DataTypes.TEXT
       allowNull: true
 
-    title:
-      type: DataTypes.STRING
-      allowNull: false
-
     {
     classMethods:
       associate: ( models )->
@@ -36,14 +32,12 @@ module.exports = ( sequelize, DataTypes ) ->
           start = req.body.start or new Date()
           end = req.body.end or undefined
           description = req.body.description or ''
-          title = req.body.title
           ACTIVITY = undefined
 
           create =
             start: start
             end: end
             description: description
-            title: title
 
           @.create( create )
             .then ( activity ) =>
@@ -83,7 +77,8 @@ module.exports = ( sequelize, DataTypes ) ->
           search =
             where:
               userId: user.id
-            include: [ @.__models.Task, @.__models.Project ]
+            include: [ @.__models.Task,
+                       @.__models.Project ]
 
           if id?
             search.where.id = id

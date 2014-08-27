@@ -1,0 +1,10 @@
+{
+  "name": "",
+  "username": "root",
+  "password": "",
+  "host": "localhost",
+  "options": {
+          "dialect": "sqlite",
+          "storage": "sandglass.sqlite"
+  }
+}

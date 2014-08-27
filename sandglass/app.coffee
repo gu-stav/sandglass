@@ -7,36 +7,20 @@ rest = require( 'restler' )
 Sequelize = require( 'sequelize' )
 
 class Sandglass
-  constructor: ( options ) ->
+  constructor: ->
     defaults =
       headless: false
       fixtures: process.env.FIXTURES || false
+      migrations: process.env.MIGRATIONS || false
 
-      api:
-        base: '/api/0.1'
-        cookie:
-          name: 'auth'
-          options:
-            expires: new Date( Date.now() + 1000 * 60 * 60 * 24 )
-            httpOnly: true
-        server:
-          port: 3000
+    defaults.api      = require( '../config-api.json' )
+    defaults.frontend = require( '../config-frontend.json' )
+    defaults.db       = require( '../config-database.json' )
 
-      frontend:
-        host: 'http://localhost:3000/api/0.1'
-        server:
-          port: 3001
+    defaults.api.cookie.options.expires =
+        new Date( Date.now() + parseInt( defaults.api.cookie.options.expires ) )
 
-      db:
-        name: ''
-        username: 'root'
-        password: ''
-        host: 'localhost'
-        options:
-          dialect: 'sqlite'
-          storage: 'sandglass.sqlite'
-
-    @options = _.defaults( defaults, options )
+    @options = defaults
 
   setupDatabase: () ->
     new Sequelize( @options.db.name,
@@ -44,8 +28,10 @@ class Sandglass
                    @options.db.password,
                    @options.db.options )
 
-  setupViews: ( app ) ->
+  setupViews: ( app ) =>
     app.options = @options.frontend
+    app.options_api = @options.api
+
     @setupMiddleware( app )
 
     app.set( 'view engine', 'jade' )
@@ -63,7 +49,7 @@ class Sandglass
       if not req.cookies?
         failed = true
       else
-        session = req.cookies[ app.options.cookie.name ]
+        session = req.cookies[ app.options_api.cookie.name ]
 
       if not session
         failed = true
@@ -172,7 +158,7 @@ class Sandglass
         body:
           email: 'gustavpursche@gmail.com'
           _rawPassword: 'test'
-          name: 'Testuser'
+          name: 'Test User'
 
       app.models.Role
         .post( role )
@@ -187,17 +173,23 @@ class Sandglass
 
   # start application
   start: () ->
-    if not @options.headless
-      app_frontend = @setupViews( express() )
-      app_frontend.listen( app_frontend.options.server.port )
+    new Promise ( resolve, reject ) =>
+      if not @options.headless
+        app_frontend = @setupViews( express() )
+        app_frontend.listen( app_frontend.options.server.port )
 
-    app_api = @setupAPI( express() )
+      app_api = @setupAPI( express() )
 
-    app_api.db.sync()
-      .then =>
-        if @options.fixtures
-          @setupFixtures( app_api )
-      .then ->
-        app_api.listen( app_api.options.server.port )
+      app_api.db.sync()
+        .then =>
+          if @options.fixtures
+            @setupFixtures( app_api )
+        .then =>
+          app_api.listen( app_api.options.server.port )
+          resolve( this )
+
+  migrate: ( username, password, file ) ->
+    require( './hamster-migrate.coffee' )( username, password, file )
+    return this
 
 module.exports = Sandglass

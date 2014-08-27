@@ -1,24 +1,16 @@
 module.exports = function(grunt) {
   grunt.initConfig({
-    coffee: {
-      compile: {
-        expand: true,
-        src: [ '**/*.coffee' ],
-        ext: '.js'
-      }
-    },
-
-    watch: {
-      coffee: {
-        files: 'sandglass/**/*.coffee',
-        tasks: [ 'coffee' ],
+    less: {
+      dist: {
+        files: {
+          'sandglass/static/dist/sandglass.css':
+          'sandglass/static/less/sandglass.less'
+        }
       },
-    },
-
-
+    }
   });
 
   require('load-grunt-tasks')(grunt);
 
-  grunt.registerTask( 'default', [ 'coffee' ] );
+  grunt.registerTask( 'build', [ 'less' ] );
 };

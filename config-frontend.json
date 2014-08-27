@@ -1,0 +1,6 @@
+{
+  "host": "http://localhost:3000/api/0.1",
+  "server": {
+    "port": "3001"
+  }
+}

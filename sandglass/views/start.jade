@@ -16,9 +16,6 @@ block content
       label Task
       input( type="text", name="task" )
     div.form-group
-      label Title
-      input( type="text", name="title" )
-    div.form-group
       label Description
       input( type="text", name="description" )
     div.form-group
@@ -28,9 +25,13 @@ block content
   ul
   each activity in activities
     li
-      strong= activity.task.title + ' - '
-      strong= activity.project.title + ' - '
-      strong= activity.title + ' - '
+
+      if activity.task
+        strong= activity.task.title + ' - '
+
+      if activity.project
+        strong= activity.project.title
+
       div= activity.description
       div= activity.start
       div= activity.end
