@@ -16,6 +16,10 @@ block content
           if activity.project
             strong.activity_project= activity.project.title
 
+          if !activity.end
+            form( action="/activity/" + activity.id + "/stop", method="post" )
+              button(type="submit", name="stop_tracking") Stop tracking
+
         p.activity_description= activity.description
 
 block tracking

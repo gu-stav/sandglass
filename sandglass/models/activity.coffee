@@ -100,6 +100,15 @@ module.exports = ( sequelize, DataTypes ) ->
           @.findAll( search )
             .then ( activities ) ->
               resolve( activities: activities )
+
+      update: ( req, id ) ->
+        return new Promise ( resolve, reject ) =>
+          data = req.body
+
+          @.find( id )
+            .then ( activity ) ->
+              activity.updateAttributes( data )
+                .then( resolve, reject )
     }
 
   )

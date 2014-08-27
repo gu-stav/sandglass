@@ -1,5 +1,6 @@
 express = require( 'express' )
 rest = require( 'restler' )
+moment = require( 'moment' )
 
 module.exports = ( app ) ->
   router = express.Router()
@@ -7,5 +8,18 @@ module.exports = ( app ) ->
       url = app.options.host + '/users/' + res.data.user.id + '/activities'
 
       rest.post( url, { data: req.body, headers: req.headers } )
+        .on 'complete', ( jres ) ->
+          res.redirect( '/' )
+
+    .post '/activity/:activityId/stop', [ app.sessionAuth ], ( req, res, next ) ->
+      activityId = req.param( 'activityId' )
+      url = app.options.host + '/users/' + res.data.user.id + '/activities/' + activityId
+
+      data =
+        data:
+          end: moment().format()
+        headers: req.headers
+
+      rest.put( url, data )
         .on 'complete', ( jres ) ->
           res.redirect( '/' )
