@@ -1,0 +1,24 @@
+{
+  "name": "sandglass",
+  "main": "index.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/gustavpursche/sandglass",
+  "authors": [
+    "Gustav Pursche <gustavpursche@gmail.com>"
+  ],
+  "moduleType": [
+    "amd",
+    "node"
+  ],
+  "license": "None",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "normalize-css": "*"
+  }
+}

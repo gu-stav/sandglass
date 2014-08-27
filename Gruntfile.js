@@ -17,11 +17,20 @@ module.exports = function(grunt) {
           verbose: true,
         }
       }
+    },
+
+    concat: {
+      bower: {
+        src: [ 'sandglass/static/bower/normalize-css/normalize.css',
+               'sandglass/static/dist/sandglass.css', ],
+        dest: 'sandglass/static/dist/sandglass.css',
+      }
     }
   });
 
   require('load-grunt-tasks')(grunt);
 
   grunt.registerTask( 'build', [ 'bower',
-                                 'less' ] );
+                                 'less',
+                                 'concat' ] );
 };
