@@ -9,8 +9,16 @@ html(lang="en")
           type="text/css",
           media="screen" )
   body
-    h1 Sandglass
+    div.sandglass-app
+      aside.sidebar
+        strong.sidebar_logo Sand glass
 
-    block header
+        block sidebar
 
-    block content
+      header.header
+        block header
+        block tracking
+        block user
+
+      section.main
+        block content

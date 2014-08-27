@@ -73,15 +73,29 @@ module.exports = ( sequelize, DataTypes ) ->
       get: ( req, id ) ->
         return new Promise ( resolve, reject ) =>
           user = req.user
+          from = req.param( 'from' )
+          to = req.param( 'to' )
 
           search =
             where:
-              userId: user.id
+              userId: user.id,
             include: [ @.__models.Task,
                        @.__models.Project ]
+            order: [
+              [ 'start', 'ASC' ]
+            ]
 
           if id?
             search.where.id = id
+
+          if from? and to?
+            search.where.start = between: [ from, to ]
+          else
+            if from?
+              search.where.start = gt: from
+
+            if to?
+              search.where.start = lt: to
 
           @.findAll( search )
             .then ( activities ) ->

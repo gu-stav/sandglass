@@ -1,37 +1,44 @@
 extends master
 
-block header
-  strong= user.name
-  span= user.email
-  a(href="/logout") Logout
-
 block content
-
-  h2 Create activity
-  form( action="/activity", method="post" )
-    div.form-group
-      label Project
-      input( type="text", name="project" )
-    div.form-group
-      label Task
-      input( type="text", name="task" )
-    div.form-group
-      label Description
-      input( type="text", name="description" )
-    div.form-group
-      button( type="submit" ) Submit
-
   h2 Activities
-  ul
-  each activity in activities
-    li
+  ul.timeline
+    each activity in activities
+      li.timeline_item.activity
+        div.activity_time
+          span.activity_start= activity.start
+          span.activity_end= activity.end
 
-      if activity.task
-        strong= activity.task.title + ' - '
+        div.activity_info
+          if activity.task
+            strong.activity_task= activity.task.title
 
-      if activity.project
-        strong= activity.project.title
+          if activity.project
+            strong.activity_project= activity.project.title
 
-      div= activity.description
-      div= activity.start
-      div= activity.end
+        p.activity_description= activity.description
+
+block tracking
+  div.track
+    h2 Create activity
+    form( action="/activity", method="post" )
+      div.form-group
+        label Project
+        input( type="text", name="project" )
+      div.form-group
+        label Task
+        input( type="text", name="task" )
+      div.form-group
+        label Description
+        input( type="text", name="description" )
+      div.form-group
+        button( type="submit" ) Submit
+
+block user
+  div.header_user
+    strong.header_user-name= user.name
+    span.header_user-email= user.email
+    div
+      a.header_user-edit(href="/user-edit") Edit
+      a.header_user-logout(href="/logout") Logout
+
