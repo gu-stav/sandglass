@@ -28,7 +28,7 @@ module.exports = ( sequelize, DataTypes ) ->
         @.belongsTo( models.Task )
 
       post: ( req ) ->
-        return new Promise ( resolve, reject ) =>
+        new Promise ( resolve, reject ) =>
           start = req.body.start or new Date()
           end = req.body.end or undefined
           description = req.body.description or ''
@@ -71,7 +71,7 @@ module.exports = ( sequelize, DataTypes ) ->
             .then( resolve, reject )
 
       get: ( req, id ) ->
-        return new Promise ( resolve, reject ) =>
+        new Promise ( resolve, reject ) =>
           user = req.user
           from = req.param( 'from' )
           to = req.param( 'to' )
@@ -100,15 +100,19 @@ module.exports = ( sequelize, DataTypes ) ->
           @.findAll( search )
             .then ( activities ) ->
               resolve( activities: activities )
+            .catch( reject )
 
       update: ( req, id ) ->
-        return new Promise ( resolve, reject ) =>
+        new Promise ( resolve, reject ) =>
           data = req.body
 
           @.find( id )
             .then ( activity ) ->
+              if not activity
+                return reject( new Error( 'Activity not found' ) )
+
               activity.updateAttributes( data )
-                .then( activity ) ->
+                .then ( activity ) ->
                   resolve( activities: [ activity ] )
                 .catch( reject )
     }
