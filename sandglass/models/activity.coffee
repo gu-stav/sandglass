@@ -108,7 +108,9 @@ module.exports = ( sequelize, DataTypes ) ->
           @.find( id )
             .then ( activity ) ->
               activity.updateAttributes( data )
-                .then( resolve, reject )
+                .then( activity ) ->
+                  resolve( activities: [ activity ] )
+                .catch( reject )
     }
 
   )
