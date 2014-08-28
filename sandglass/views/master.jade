@@ -21,4 +21,9 @@ html(lang="en")
         block user
 
       section.main
+        if errors
+          ul
+          each error in errors
+            li.message= error
+
         block content

@@ -56,12 +56,12 @@ module.exports = ( sequelize, DataTypes ) ->
           this.find( search )
             .then ( user ) ->
               if not user
-                reject( new Error( 'User not found' ) )
-              else
-                if not options.full
-                  resolve( users: [ user.render() ] )
-                else
-                  resolve( users: [ user ] )
+                return reject( new Error( 'User not found' ) )
+
+              if not options.full
+                user = user.render()
+
+              resolve( users: [ user ] )
 
       auth: ( req ) ->
         return new Promise ( resolve, reject ) =>
@@ -82,22 +82,22 @@ module.exports = ( sequelize, DataTypes ) ->
 
         new Promise ( resolve, reject ) =>
           if not data._rawPassword
-            throw new Error( '_rawPassword was not provided.' )
+            return reject( new Error( '_rawPassword was not provided.' ) )
 
           bcrypt.genSalt 12, ( err, salt ) =>
             if err
-              throw new Error( err )
+              return reject ( err )
 
             bcrypt.hash data._rawPassword, salt, ( err, hash ) =>
               if err
-                throw new Error( err )
+                return reject( err )
 
               data.password = hash
 
               @.create( data )
                 .then ( user ) =>
                   if not user
-                    throw new Error( 'No user created' )
+                    return reject( new Error( 'No user created' ) )
 
                   new Promise ( resolve, reject ) =>
                     @.__models.Role.getDefault()
@@ -144,14 +144,9 @@ module.exports = ( sequelize, DataTypes ) ->
 
       login: ( req, response ) ->
         new Promise ( resolve, reject ) =>
-          password = req.body.password
-          email = req.body.email
-
-          if not password
-            reject( new Error( 'No password was provided' ) )
-
-          if not email
-            reject( new Error( 'No email was provided' ) )
+          data = req.body
+          password = data.password
+          email = data.email
 
           search =
             where:
@@ -160,14 +155,17 @@ module.exports = ( sequelize, DataTypes ) ->
           @.find( search )
             .then ( user ) =>
               if not user
-                reject( new Error( 'User was not found' ) )
+                return reject( new Error( 'Invalid login credentials' ) )
+
+              if not password
+                return reject( new Error( 'No password provided' ) )
 
               bcrypt.compare password, user.password, ( err, res ) =>
                 if err
-                  reject( new Error( err ) )
+                  return reject( err )
 
                 if not res
-                  reject( new Error( 'Passwords do not match' ) )
+                  return reject( new Error( 'Invalid password' ) )
 
                 # create new session
                 session = crypto.createHash( 'sha1' )

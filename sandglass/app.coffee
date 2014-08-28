@@ -41,30 +41,27 @@ class Sandglass
     # define basic storage
     app.use ( req, res, next ) ->
       res.data = {}
+      res.errors = []
+
+      res.error = ( err ) ->
+        if err
+          res.errors.push( err )
+
+        next()
+
       next()
 
     # auth middleware
     app.sessionAuth = ( req, res, next ) =>
-      failed = false
-
-      if not req.cookies?
-        failed = true
-      else
-        session = req.cookies[ app.options_api.cookie.name ]
-
-      if not session
-        failed = true
-
-      if failed
-        return res.status( 403 ).end()
+      session = req.cookies[ app.options_api.cookie.name ] or undefined
 
       rest.get( app.options.host + '/sessions/' + session )
-        .on 'success', ( jres ) ->
-          if not jres or not jres.users
-            return res.status( 403 ).end()
-
-          res.data.user = jres.users[ 0 ]
-          next()
+        .on 'complete', ( jres ) ->
+          if jres.users
+            res.data.user = jres.users[ 0 ]
+            next()
+          else
+            res.redirect( '/signup' )
 
     @mount( app, require( './routes/index.coffee' )( app ) )
     return app
@@ -80,14 +77,15 @@ class Sandglass
     # initialize response object
     app.use ( req, res, next ) ->
       # hold collected data
-      res.data = []
+      res.data = {}
       # hold collected errors
       res.errors = []
       # success handler
       res.success = ( data ) ->
         if data
-          res.data.push( data )
-          next()
+          _.assign( res.data, data )
+
+        next()
 
       # error handler
       res.error = ( err ) ->
@@ -95,6 +93,7 @@ class Sandglass
           res.errors.push( err );
 
         next()
+
       next()
 
     # always preload user, when user-id is involved
@@ -102,7 +101,7 @@ class Sandglass
       app.models.User.auth( req )
         .then ( users ) ->
           if not users
-            return next()
+            res.error( new Error( 'Not auth' ) )
 
           user = users.users[0]
 
@@ -120,11 +119,15 @@ class Sandglass
 
     # execute response
     app.all '*', ( req, res, next ) ->
-      if res.data
-        if( res.data.length is 1 )
-          res.json( res.data[ 0 ] )
-        else
-          res.json( res.data )
+      if res.errors and res.errors.length > 0
+        res.data.errors = []
+
+        _.each res.errors, ( err ) ->
+          res.data.errors.push( err.toString() )
+
+        res.status( 400 )
+
+      res.json( res.data ).end()
 
     return app
 

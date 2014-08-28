@@ -39,10 +39,11 @@ block tracking
         button( type="submit" ) Submit
 
 block user
-  div.header_user
-    strong.header_user-name= user.name
-    span.header_user-email= user.email
-    div
-      a.header_user-edit(href="/user-edit") Edit
-      a.header_user-logout(href="/logout") Logout
+  if user
+    div.header_user
+      strong.header_user-name= user.name
+      span.header_user-email= user.email
+      div
+        a.header_user-edit(href="/user-edit") Edit
+        a.header_user-logout(href="/logout") Logout
 

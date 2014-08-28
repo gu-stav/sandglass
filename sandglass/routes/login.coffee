@@ -8,3 +8,5 @@ module.exports = ( app ) ->
         .on 'success', ( jres, rres ) ->
           res.set( rres.headers )
           res.redirect( '/' )
+        .on 'fail', ( jres ) ->
+          res.render( 'signup', jres )
