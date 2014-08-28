@@ -21,4 +21,6 @@ module.exports = ( app ) ->
         .get( app.options.host + '/users/' + userId + '/activities' + get_data, data )
         .on 'complete', ( jres, err ) ->
           _.assign( res.data, jres )
+          res.data.title = "Tracking"
+
           res.render( 'start', res.data )

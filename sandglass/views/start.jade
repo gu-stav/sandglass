@@ -23,27 +23,25 @@ block content
         p.activity_description= activity.description
 
 block tracking
-  div.track
-    h2 Create activity
-    form( action="/activity", method="post" )
-      div.form-group
-        label Project
-        input( type="text", name="project" )
-      div.form-group
-        label Task
-        input( type="text", name="task" )
-      div.form-group
-        label Description
-        input( type="text", name="description" )
-      div.form-group
-        button( type="submit" ) Submit
+  form( action="/activity", method="post" ).track
+    div.form-group
+      input( type="text",
+             name="project",
+             placeholder="Project" ).inp
+    div.form-group
+      input( type="text",
+             name="task",
+             placeholder="Task" ).inp
+    div.form-group
+      input( type="text",
+             name="description",
+             placeholder="Description" ).inp
+    div.form-group
+      button( type="submit" ).btn Submit
 
 block user
   if user
     div.header_user
       strong.header_user-name= user.name
-      span.header_user-email= user.email
-      div
-        a.header_user-edit(href="/user-edit") Edit
-        a.header_user-logout(href="/logout") Logout
+      a.header_user-logout(href="/logout") Logout
 
