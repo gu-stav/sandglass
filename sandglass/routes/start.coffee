@@ -12,7 +12,7 @@ module.exports = ( app ) ->
       data =
         headers: req.headers
 
-      from = moment().subtract( 'months', 1 ).format()
+      from = moment().subtract( 1, 'months' ).format()
       to = moment().format()
 
       get_data = '?from=' + from + '&to=' + to
