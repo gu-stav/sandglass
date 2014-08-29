@@ -92,7 +92,6 @@ module.exports = ( sequelize, DataTypes ) ->
 
     instanceMethods:
       addInstance: ( model, req ) ->
-        console.log( model )
         new Promise ( resolve, reject ) =>
           model.post( req )
             .then ( inst ) =>
