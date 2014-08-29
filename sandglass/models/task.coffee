@@ -17,12 +17,17 @@ module.exports = ( sequelize, DataTypes ) ->
 
       post: ( req ) ->
         return new Promise ( resolve, reject ) =>
+          title = req.body.title
+
+          if not title
+            return resolve()
+
           create =
-            title: req.body.title
+            title: title
 
           where =
             where:
-              title: req.body.title
+              title: title
               UserId: req.user.id
 
           @.find( where )
@@ -34,7 +39,6 @@ module.exports = ( sequelize, DataTypes ) ->
                   .then ( task ) =>
                     task.setUser( req.user )
                   .then( resolve, reject )
-
 
       get: ( req, id ) ->
         return new Promise ( resolve, reject ) =>

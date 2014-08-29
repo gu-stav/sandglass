@@ -18,8 +18,13 @@ module.exports = ( sequelize, DataTypes ) ->
 
       post: ( req ) ->
         return new Promise ( resolve, reject ) =>
+          title = req.body.title
+
+          if not title
+            return resolve()
+
           create =
-            title: req.body.title
+            title: title
 
           where =
             where:

@@ -1,4 +1,6 @@
+_ = require( 'lodash' )
 express = require( 'express' )
+Promise = require( 'bluebird' )
 
 module.exports = ( app ) ->
   express.Router()
@@ -20,4 +22,14 @@ module.exports = ( app ) ->
 
     .post app.options.base + '/users/:userId/activities', [ app.sessionAuth ], ( req, res, next ) ->
       app.models.Activity.post( req )
+        # set task
+        .then ( activity ) ->
+          req_clone = _.cloneDeep( req )
+          req_clone.body.title = req.body.task or undefined
+          activity.addInstance( app.models.Task, req_clone )
+        # set activity
+        .then ( activity ) ->
+          req_clone = _.cloneDeep( req )
+          req_clone.body.title = req.body.project or undefined
+          activity.addInstance( app.models.Project, req_clone )
         .then( res.success, res.error )

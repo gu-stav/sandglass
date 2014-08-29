@@ -32,7 +32,6 @@ module.exports = ( sequelize, DataTypes ) ->
           start = req.body.start or new Date()
           end = req.body.end or undefined
           description = req.body.description or ''
-          ACTIVITY = undefined
 
           create =
             start: start
@@ -41,34 +40,9 @@ module.exports = ( sequelize, DataTypes ) ->
 
           @.create( create )
             .then ( activity ) =>
-              if not activity
-                reject( new Error( 'Can not create activity' ) )
-
-              ACTIVITY = activity
               activity.setUser( req.user )
-            .then ( activity ) =>
-              post =
-                body:
-                  title: req.body.task
-                user: req.user
-
-              @.__models.Task.post( post )
-
-            .then ( task ) =>
-              ACTIVITY.setTask( task )
-
-            .then ( activity ) =>
-              post =
-                body:
-                  title: req.body.project
-                user: req.user
-
-              @.__models.Project.post( post )
-
-            .then ( project ) =>
-              ACTIVITY.setProject( project )
-
-            .then( resolve, reject )
+                .then( resolve, reject )
+            .catch( reject )
 
       get: ( req, id ) ->
         new Promise ( resolve, reject ) =>
@@ -115,6 +89,19 @@ module.exports = ( sequelize, DataTypes ) ->
                 .then ( activity ) ->
                   resolve( activities: [ activity ] )
                 .catch( reject )
+
+    instanceMethods:
+      addInstance: ( model, req ) ->
+        console.log( model )
+        new Promise ( resolve, reject ) =>
+          model.post( req )
+            .then ( inst ) =>
+              if not inst
+                resolve( @ )
+
+              @[ 'set' + model.name ]( inst )
+                .then( resolve, reject )
+
     }
 
   )
