@@ -2,6 +2,13 @@ extends master
 
 block content
   h2 Activities
+
+  span= showing_from
+  span= showing_to
+
+  a(href= prev_link) Previous Week
+  a(href= next_link) Next Week
+
   ul.timeline
     each activity in activities
       li.timeline_item.activity
