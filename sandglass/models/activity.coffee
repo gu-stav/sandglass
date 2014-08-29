@@ -90,6 +90,18 @@ module.exports = ( sequelize, DataTypes ) ->
                   resolve( activities: [ activity ] )
                 .catch( reject )
 
+      delete: ( req, id ) ->
+        new Promise ( resolve, reject ) =>
+          @.find( id )
+            .then ( activity ) ->
+              if not activity
+                return reject( new Error( 'Activity not found' ) )
+
+              activity.destroy()
+                .then ( activity ) ->
+                  resolve( activities: [ activity ] )
+                .catch( reject )
+
     instanceMethods:
       addInstance: ( model, req ) ->
         new Promise ( resolve, reject ) =>

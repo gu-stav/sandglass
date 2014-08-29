@@ -20,6 +20,9 @@ block content
             form( action="/activity/" + activity.id + "/stop", method="post" )
               button(type="submit", name="stop_tracking") Stop tracking
 
+          form( action="/activity/" + activity.id + "/delete", method="post" )
+            button(type="submit", name="delete") Delete
+
         p.activity_description= activity.description
 
 block tracking

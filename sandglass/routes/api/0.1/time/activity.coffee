@@ -20,6 +20,10 @@ module.exports = ( app ) ->
       app.models.Activity.update( req, req.param( 'activityId' ) )
         .then( res.success, res.error )
 
+    .delete app.options.base + '/users/:userId/activities/:activityId', ( req, res, next ) ->
+      app.models.Activity.delete( req, req.param( 'activityId' ) )
+        .then( res.success, res.error )
+
     .post app.options.base + '/users/:userId/activities', [ app.sessionAuth ], ( req, res, next ) ->
       app.models.Activity.post( req )
         # set task

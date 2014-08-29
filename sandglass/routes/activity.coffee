@@ -22,4 +22,15 @@ module.exports = ( app ) ->
 
       rest.put( url, data )
         .on 'complete', ( jres ) ->
-          res.redirect( '/' )
+          res.redirect( 'back' )
+
+    .post '/activity/:activityId/delete', [ app.sessionAuth ], ( req, res, next ) ->
+      activityId = req.param( 'activityId' )
+      url = app.options.host + '/users/' + res.data.user.id + '/activities/' + activityId
+
+      data =
+        headers: req.headers
+
+      rest.del( url, data )
+        .on 'complete', ( jres ) ->
+          res.redirect( 'back' )
