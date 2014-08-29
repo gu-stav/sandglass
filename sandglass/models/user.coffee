@@ -108,16 +108,26 @@ module.exports = ( sequelize, DataTypes ) ->
                   resolve( users: [ user.render() ] )
 
       get: ( req, id ) ->
+        includes = [ @.__models.Role ]
+
         new Promise ( resolve, reject ) =>
+          where =
+            where:
+              id: id
+            include: includes
+
           if id
-            @.find( id )
+            @.find( where )
             .then ( user ) ->
               if not user
                 reject( new Error( 'User not found' ) )
 
               resolve( users: [ user.render() ] )
           else
-            @.findAll()
+            where =
+              include: includes
+
+            @.findAll( where )
               .then ( users ) =>
                 result = []
                 for index, user of users
