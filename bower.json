@@ -19,6 +19,7 @@
     "tests"
   ],
   "dependencies": {
-    "normalize-css": "*"
+    "normalize-css": "*",
+    "font-awesome": "~4.2.0"
   }
 }

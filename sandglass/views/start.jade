@@ -1,16 +1,18 @@
 extends master
 
 block content
-  h2 Activities
-
   form( action="", method="get" ).range
     input(name="from", value=showing_from ).range_from
     input(name="to", value=showing_to ).range_to
     button(type="submit").btn Submit
 
   div
-    a(href= prev_link).range_prev Previous
-    a(href= next_link).range_next Next
+    a(href= prev_link).range_prev
+      i.fa.fa-arrow-left
+      | Previous
+    a(href= next_link).range_next
+      | Next
+      i.fa.fa-arrow-right
 
   ul.timeline
     each activity in activities
@@ -28,10 +30,14 @@ block content
 
           if !activity.end
             form( action="/activity/" + activity.id + "/stop", method="post" )
-              button(type="submit", name="stop_tracking") Stop tracking
+              button(type="submit", name="stop_tracking").btn--transparent
+                i.fa.fa-pause
+                | Stop tracking
 
           form( action="/activity/" + activity.id + "/delete", method="post" )
-            button(type="submit", name="delete") Delete
+            button(type="submit", name="delete").btn--transparent
+              i.fa.fa-trash
+              | Delete
 
         p.activity_description= activity.description
 
@@ -40,25 +46,35 @@ block tracking
     div.form-group
       input( type="text",
              name="project",
-             placeholder="Project" ).inp
+             placeholder="Project" ).inp.track_inp.track_inp--first
     div.form-group
       input( type="text",
              name="task",
-             placeholder="Task" ).inp
+             placeholder="Task" ).inp.track_inp.track_inp--second
     div.form-group
       input( type="text",
              name="description",
-             placeholder="Description" ).inp
+             placeholder="Description" ).inp.track_inp.track_inp--third
     div.form-group
-      button( type="submit" ).btn Submit
+      button( type="submit" ).btn.track_submit
+        i.fa.fa-clock-o
+        | Submit
 
 block user
   if user
     div.header_user
+      i.fa.fa-user.header_user-image
       strong.header_user-name= user.name
-      a.header_user-logout(href="/logout") Logout
+      a.header_user-logout(href="/logout")
+        | Logout
+        i.fa.fa-sign-out
 
 block sidebar
-  nav
-    a(href="/") Timeline
+  nav.navigation
+    a(href="/")
+      i.fa.fa-clock-o
+      span Timeline
+    a(href="/reports")
+      i.fa.fa-book
+      span Reports
 

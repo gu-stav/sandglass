@@ -1,0 +1,23 @@
+.navigation {
+  > a {
+    border-bottom: 1px solid lighten( @nav-background-color, 5% );
+    border-top: 1px solid darken( @nav-background-color, 15% );
+    color: @nav-color;
+    display: block;
+    padding: 1rem 0;
+    text-align: center;
+  }
+
+  > a > .fa {
+    color: @brand-background-color;
+    display: block;
+    font-size: 1.6rem;
+    margin-bottom: .3rem;
+  }
+
+  > a > span {
+    color: darken( @nav-color, 60% );
+    font-size: .7rem;
+    text-transform: uppercase;
+  }
+}

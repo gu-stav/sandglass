@@ -9,16 +9,6 @@ module.exports = function(grunt) {
       },
     },
 
-    bower: {
-      dist: {
-        options: {
-          targetDir: 'sandglass/static/bower/',
-          cleanBowerDir: true,
-          verbose: true,
-        }
-      }
-    },
-
     concat: {
       bower: {
         src: [ 'sandglass/static/bower/normalize-css/normalize.css',
