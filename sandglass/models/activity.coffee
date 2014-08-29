@@ -1,3 +1,4 @@
+date = require( '../utils/date.coffee' )
 Promise = require( 'bluebird' )
 
 module.exports = ( sequelize, DataTypes ) ->
@@ -47,8 +48,14 @@ module.exports = ( sequelize, DataTypes ) ->
       get: ( req, id ) ->
         new Promise ( resolve, reject ) =>
           user = req.user
-          from = req.param( 'from' )
-          to = req.param( 'to' )
+          from = date.fromString( req.param( 'from' ) )
+          to = date.fromString( req.param( 'to' ) )
+
+          if from
+            from = from.toDate()
+
+          if to
+            to = to.toDate()
 
           search =
             where:

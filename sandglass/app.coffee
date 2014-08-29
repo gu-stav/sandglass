@@ -36,7 +36,7 @@ class Sandglass
 
     app.set( 'view engine', 'jade' )
     app.set( 'views', __dirname + '/views' )
-    app.use( express.static( __dirname + '/static' ) );
+    app.use( express.static( __dirname + '/static' ) )
 
     # define basic storage
     app.use ( req, res, next ) ->

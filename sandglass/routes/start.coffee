@@ -1,4 +1,7 @@
 _ = require( 'lodash' )
+date = require( '../utils/date.coffee' )
+decode = require( '../utils/url.coffee' ).decode
+encode = require( '../utils/url.coffee' ).encode
 express = require( 'express' )
 moment = require( 'moment' )
 rest = require( 'restler' )
@@ -11,49 +14,56 @@ module.exports = ( app ) ->
       userId = res.data.user.id
       userSession = res.data.user.session
 
+      if not req.param( 'from' )
+        from = moment().subtract( 1, 'weeks' )
+      else
+        from = date.fromString( decode( req.param( 'from' ) ), 'Date' )
+
+      if not req.param( 'to' )
+        to = moment()
+      else
+        to = date.fromString( decode( req.param( 'to' ) ), 'Date' )
+
       data =
         headers: req.headers
 
-      from = req.param( 'from' )
-      to = req.param( 'to' )
-
-      if not from
-        from = moment().subtract( 1, 'weeks' )
-      else
-        from = decodeURIComponent( from )
-        from = moment.utc( from )
-
-      if not to
-        to = moment()
-      else
-        to = decodeURIComponent( to )
-        to = moment.utc( to )
-
-      from_url = encodeURIComponent( from.format() )
-      to_url = encodeURIComponent( to.format() )
-
-      get_data = '?from=' + from_url + '&to=' + to_url
+      get_data = '?from=' + encode( date.format( from ) ) +
+                 '&to=' + encode( date.format( to ) )
 
       rest
         .get( app.options.host + '/users/' + userId + '/activities' + get_data, data )
         .on 'complete', ( jres, err ) ->
-          week_ahead = moment( from ).add( 1, 'weeks' )
-          week_back = moment( from ).subtract( 1, 'weeks' )
-          today = moment()
 
-          week_back_url = encodeURIComponent( week_back.format() )
-          week_ahead_url = encodeURIComponent( week_ahead.format() )
+          week_ahead = to.clone().add( 1, 'weeks' )
+          week_ahead_start = to.clone()
 
-          today_url = encodeURIComponent( today.format() )
-          from_url = encodeURIComponent( from.format() )
+          week_back = from.clone().subtract( 1, 'weeks' )
+          week_back_end = from.clone()
+
+          week_back_url = date.format( week_back, 'Date' )
+          week_back_end_url = date.format( week_back_end, 'Date' )
+
+          week_ahead_url = date.format( week_ahead, 'Date' )
+          week_ahead_start_url = date.format( week_ahead_start, 'Date' )
 
           template_data =
             title:        'Tracking'
-            today:        today.format()
-            prev_link:    '/?from=' + week_back_url + '&to=' + today_url
-            next_link:    '/?from=' + today_url + '&to=' + week_ahead_url
-            showing_from: from.format( DATE_FORMAT )
-            showing_to:   to.format( DATE_FORMAT )
+            prev_link:    '/?from=' + encode( week_back_url ) +
+                          '&to=' + encode( week_back_end_url )
+            next_link:    '/?from=' + encode( week_ahead_start_url ) +
+                          '&to=' + encode( week_ahead_url )
+            showing_from: date.format( from, 'Date' )
+            showing_to:   date.format( to, 'Date' )
+
+          if jres.activities? and jres.activities.length
+            for activity in jres.activities
+              if activity.start
+                activity_start = moment( activity.start )
+                activity.start = date.format( activity_start, 'DateTime' )
+
+              if activity.end
+                activity_end = moment( activity.end )
+                activity.end = date.format( activity_end, 'DateTime' )
 
           _.assign( res.data, jres, template_data )
           res.render( 'start', res.data )

@@ -3,11 +3,14 @@ extends master
 block content
   h2 Activities
 
-  span= showing_from
-  span= showing_to
+  form( action="", method="get" ).range
+    input(name="from", value=showing_from ).range_from
+    input(name="to", value=showing_to ).range_to
+    button(type="submit").btn Submit
 
-  a(href= prev_link) Previous Week
-  a(href= next_link) Next Week
+  div
+    a(href= prev_link).range_prev Previous
+    a(href= next_link).range_next Next
 
   ul.timeline
     each activity in activities
@@ -54,4 +57,8 @@ block user
     div.header_user
       strong.header_user-name= user.name
       a.header_user-logout(href="/logout") Logout
+
+block sidebar
+  nav
+    a(href="/") Timeline
 
