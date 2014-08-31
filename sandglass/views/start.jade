@@ -22,7 +22,12 @@ block content
       if activities
         ul
           each activity in group_activities
-            li.timeline_item.activity
+            - activity_active=""
+
+            if !activity.end
+              - activity_active= "activity--active"
+
+            li(class="activity #{activity_active}")
               div.activity_time
                 strong.activity_duration= activity.duration
                 span.activity_start= activity.start
@@ -80,10 +85,13 @@ block header
 
 block sidebar
   nav.navigation
-    a(href="/")
+    a(href="/").navigation_item.navigation_item--active
       i.fa.fa-clock-o
       span Timeline
-    a(href="/reports")
+    a(href="/reports").navigation_item
       i.fa.fa-book
       span Reports
+    a(href="/settings").navigation_item
+      i.fa.fa-cog
+      span Settings
 

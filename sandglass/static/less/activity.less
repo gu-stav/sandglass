@@ -1,9 +1,37 @@
 .activity {
+  border-bottom: 1px solid @border-color;
   display: flex;
   flex-wrap: wrap;
-  min-height: 5rem;
-  padding: 1rem;
+  padding: 1.2rem;
   position: relative;
+
+  &:hover {
+    background-color: @box-background-color;
+    border-bottom: 1px solid @border-color;
+    cursor: pointer;
+
+    button[name="delete"],
+    button[name="stop_tracking"] {
+      display: inline-block;
+    }
+  }
+
+  &:hover &_time:after {
+    background-color: @box-background-color;
+  }
+
+  &--active &_time:after {
+    color: @brand-background-color;
+    content: "\f01d";
+  }
+
+  &--active &_time {
+    border-color: @brand-background-color;
+  }
+
+  &--active &_duration {
+    color: @brand-background-color;
+  }
 
   &_time {
     border-right: 2px solid @border-color;
@@ -13,38 +41,37 @@
     position: absolute;
     text-align: right;
     top: 0;
-    width: 7.5rem;
+    width: 8.2rem;
 
     &:after {
       background-color: @body-background-color;
       border-radius: .4rem;
-      color: @brand-background-color;
+      color: darken( @border-color, 20% );
       content: "\f192";
       font-family: FontAwesome;
+      font-size: .8rem;
       padding: .1rem;
       position: absolute;
-      right: -.6rem;
-      top: .8rem;
+      right: -.5rem;
+      top: 1.2rem;
     }
   }
 
   &_duration {
     display: block;
-  }
-
-  &_duration {
-    font-weight: bold;
+    margin-bottom: .4rem;
   }
 
   &_start,
   &_end {
-    font-size: .9rem;
+    font-size: .8rem;
   }
 
   &_description {
+    color: lighten( @box-color, 25% );
     font-size: .9rem;
     line-height: 1.5;
-    margin-top: 0;
+    margin-top: .3rem;
     margin-bottom: 0;
     width: 100%;
   }
@@ -56,10 +83,11 @@
 
   button[name="delete"],
   button[name="stop_tracking"] {
-    font-size: .9rem;
+    display: none;
+    font-size: .8rem;
     position: absolute;
-    right: 1rem;
-    top: 1rem;
+    right: 1.2rem;
+    top: 1.2rem;
 
     > .fa {
       margin-right: .2rem;
@@ -71,7 +99,9 @@
   }
 
   &_project:before {
-    content: ' @ ';
-    color: lighten( @box-color, 40% );
+    content: '—';
+    color: lighten( @box-color, 50% );
+    font-weight: normal;
+    margin: 0 .2rem;
   }
 }
