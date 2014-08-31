@@ -33,15 +33,17 @@ module.exports = ( app ) ->
         .then( res.success, res.error )
 
     .post app.options.base + '/users/:userId/activities', [ app.sessionAuth ], ( req, res, next ) ->
-      app.models.Activity.post( req )
-        # set task
-        .then ( activity ) ->
-          req_clone = _.cloneDeep( req )
-          req_clone.body.title = req.body.task or undefined
-          activity.addInstance( app.models.Task, req_clone )
-        # set activity
-        .then ( activity ) ->
-          req_clone = _.cloneDeep( req )
-          req_clone.body.title = req.body.project or undefined
-          activity.addInstance( app.models.Project, req_clone )
-        .then( res.success, res.error )
+      app.models.User.get( req, req.param( 'userId') )
+        .then ( user ) ->
+          app.models.Activity.post( req, user )
+            # set task
+            .then ( activity ) ->
+              req_clone = _.cloneDeep( req )
+              req_clone.body.title = req.body.task or undefined
+              activity.addInstance( app.models.Task, req_clone, user )
+            # set activity
+            .then ( activity ) ->
+              req_clone = _.cloneDeep( req )
+              req_clone.body.title = req.body.project or undefined
+              activity.addInstance( app.models.Project, req_clone, user )
+            .then( res.success, res.error )

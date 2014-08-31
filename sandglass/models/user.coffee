@@ -109,6 +109,7 @@ module.exports = ( sequelize, DataTypes ) ->
         includes = [ @.__models.Role ]
 
         new Promise ( resolve, reject ) =>
+
           # fast path - user was already preloaded
           if req.user and req.user.id is id
             return resolve( req.user )
@@ -124,7 +125,7 @@ module.exports = ( sequelize, DataTypes ) ->
               if not user
                 return reject( errors.BadRequest( 'User not found' ) )
 
-              resolve( users: [ user.render() ] )
+              resolve( user.render() )
           else
             where =
               include: includes

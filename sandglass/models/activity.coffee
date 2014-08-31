@@ -48,14 +48,14 @@ module.exports = ( sequelize, DataTypes ) ->
 
       get: ( req, user, id ) ->
         new Promise ( resolve, reject ) =>
-          from = date.fromString( req.param( 'from' ) )
-          to = date.fromString( req.param( 'to' ) )
+          from = req.param( 'from' )
+          to = req.param( 'to' )
 
           if from
-            from = from.toDate()
+            from = date.fromString( from ).toDate()
 
           if to
-            to = to.toDate()
+            to = date.fromString( to ).to.toDate()
 
           search =
             where: {}
@@ -65,8 +65,8 @@ module.exports = ( sequelize, DataTypes ) ->
               [ 'start', 'ASC' ]
             ]
 
-          if user
-            search.where.userId = user.id
+          if user?
+            search.where.UserId = user.id
 
           if id?
             search.where.id = id
@@ -91,7 +91,7 @@ module.exports = ( sequelize, DataTypes ) ->
           search =
             where:
               id: id
-              userId: user.id
+              userId: User.id
 
           @.find( search )
             .then ( activity ) ->
@@ -108,7 +108,7 @@ module.exports = ( sequelize, DataTypes ) ->
           search =
             where:
               id: id
-              userId: user.id
+              userId: User.id
 
           @.find( search )
             .then ( activity ) ->
@@ -121,9 +121,9 @@ module.exports = ( sequelize, DataTypes ) ->
                 .catch( reject )
 
     instanceMethods:
-      addInstance: ( model, req ) ->
+      addInstance: ( model, req, user ) ->
         new Promise ( resolve, reject ) =>
-          model.post( req )
+          model.post( req, user )
             .then ( inst ) =>
               if not inst
                 resolve( @ )

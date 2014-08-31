@@ -16,7 +16,10 @@ module.exports = ( sequelize, DataTypes ) ->
         @.hasMany( models.Task )
         @.hasOne( models.Activity )
 
-      post: ( req ) ->
+        @.__models =
+          User:models.User
+
+      post: ( req, user ) ->
         return new Promise ( resolve, reject ) =>
           title = req.body.title
 
@@ -29,23 +32,33 @@ module.exports = ( sequelize, DataTypes ) ->
           where =
             where:
               title: req.body.title
-              userId: req.user.id
+
+          if user?
+            where.where.UserId = user.id
 
           @.find( where )
             .then ( project ) =>
               if not project
                 @.create( create )
                   .then ( project ) =>
-                    project.setUser( req.user )
+                    if not user?
+                      return resolve( project )
+
+                    @.__models.User.get( req, user.id )
+                      .then ( user ) ->
+                        project.setUser( user )
+                          .then( resolve, reject )
                   .then( resolve, reject )
               else
                 resolve( project )
 
-      get: ( req, id ) ->
+      get: ( req, user, id ) ->
         return new Promise ( resolve, reject ) =>
           where =
-            where:
-              UserId: req.user.id
+            where: {}
+
+          if user?
+            where.where.UserId = user.id
 
           if id?
             where.where.id = id

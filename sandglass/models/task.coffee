@@ -15,7 +15,10 @@ module.exports = ( sequelize, DataTypes ) ->
         @.hasMany( models.Project )
         @.hasOne( models.Activity )
 
-      post: ( req ) ->
+        @.__models =
+          User:models.User
+
+      post: ( req, user ) ->
         return new Promise ( resolve, reject ) =>
           title = req.body.title
 
@@ -28,7 +31,9 @@ module.exports = ( sequelize, DataTypes ) ->
           where =
             where:
               title: title
-              UserId: req.user.id
+
+          if user?
+            where.where.UserId = user.id
 
           @.find( where )
             .then ( task ) =>
@@ -37,14 +42,22 @@ module.exports = ( sequelize, DataTypes ) ->
               else
                 @.create( create )
                   .then ( task ) =>
-                    task.setUser( req.user )
+                    if not user?
+                      return resolve( task )
+
+                    @.__models.User.get( req, user.id )
+                      .then ( user ) ->
+                        task.setUser( user )
+                          .then( resolve, reject )
                   .then( resolve, reject )
 
-      get: ( req, id ) ->
+      get: ( req, user, id ) ->
         return new Promise ( resolve, reject ) =>
           where =
-            where:
-              UserId: req.user.id
+            where: {}
+
+          if user?
+            where.where.UserId = user.id
 
           if id?
             where.where.id = id
@@ -52,6 +65,7 @@ module.exports = ( sequelize, DataTypes ) ->
           @.findAll( where )
             .then ( tasks ) ->
               resolve( tasks: tasks )
+            .catch( reject )
     }
 
   )
