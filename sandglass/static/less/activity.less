@@ -16,17 +16,18 @@
     width: 7.5rem;
 
     &:after {
+      background-color: @body-background-color;
+      border-radius: .4rem;
       color: @brand-background-color;
       content: "\f192";
       font-family: FontAwesome;
+      padding: .1rem;
       position: absolute;
-      right: -.5rem;
+      right: -.6rem;
       top: .8rem;
     }
   }
 
-  &_start,
-  &_end,
   &_duration {
     display: block;
   }

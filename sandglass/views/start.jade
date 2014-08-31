@@ -1,49 +1,54 @@
 extends master
 
 block content
-  form( action="", method="get" ).range
-    a(href= prev_link).range_prev
-      i.fa.fa-arrow-left
+  div.timeline
+    form( action="", method="get" ).range
+      a(href= prev_link).range_prev
+        i.fa.fa-arrow-left
 
-    input(name="from", value=showing_from ).range_from.inp.inp--transparent.inp--width-auto
-    input(name="to", value=showing_to ).range_to.inp.inp--transparent.inp--width-auto
+      input(name="from", value=showing_from ).range_from.inp.inp--transparent.inp--width-auto
+      input(name="to", value=showing_to ).range_to.inp.inp--transparent.inp--width-auto
 
-    button(type="submit").btn Submit
+      button(type="submit").btn Submit
 
-    a(href= next_link).range_next
-      i.fa.fa-arrow-right
+      a(href= next_link).range_next
+        i.fa.fa-arrow-right
 
-    p.range_current-label This week
+      p.range_current-label This week
 
-  ul.timeline
-    each activity in activities
-      li.timeline_item.activity
-        div.activity_time
-          span.activity_duration= activity.humanized
-          span.activity_start= activity.start
+    each group_activities, groupName in activities
+      h2.timeline_group= groupName
 
-          if activity.end
-            span.activity_end= activity.end
+      if activities
+        ul
+          each activity in group_activities
+            li.timeline_item.activity
+              div.activity_time
+                strong.activity_duration= activity.duration
+                span.activity_start= activity.start
 
-        div.activity_info
-          if activity.task
-            strong.activity_task= activity.task.title
+                if activity.end
+                  span.activity_end= '-' + activity.end
 
-          if activity.project
-            strong.activity_project= activity.project.title
+              div.activity_info
+                if activity.task
+                  strong.activity_task= activity.task.title
 
-          if !activity.end
-            form( action="/activity/" + activity.id + "/stop", method="post" )
-              button(type="submit", name="stop_tracking").btn--transparent
-                i.fa.fa-pause
-                | Stop tracking
+                if activity.project
+                  strong.activity_project= activity.project.title
 
-          form( action="/activity/" + activity.id + "/delete", method="post" )
-            button(type="submit", name="delete").btn--transparent
-              i.fa.fa-trash
-              | Delete
+                if !activity.end
+                  form( action="/activity/" + activity.id + "/stop", method="post" )
+                    button(type="submit", name="stop_tracking").btn--transparent
+                      i.fa.fa-pause
+                      | Stop tracking
 
-        p.activity_description= activity.description
+                form( action="/activity/" + activity.id + "/delete", method="post" )
+                  button(type="submit", name="delete").btn--transparent
+                    i.fa.fa-trash
+                    | Delete
+
+              p.activity_description= activity.description
 
 block header
   header.header

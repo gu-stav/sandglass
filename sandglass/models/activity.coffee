@@ -1,4 +1,5 @@
 date = require( '../utils/date.coffee' )
+moment = require( 'moment' )
 Promise = require( 'bluebird' )
 
 module.exports = ( sequelize, DataTypes ) ->
@@ -119,7 +120,6 @@ module.exports = ( sequelize, DataTypes ) ->
 
               @[ 'set' + model.name ]( inst )
                 .then( resolve, reject )
-
     }
 
   )

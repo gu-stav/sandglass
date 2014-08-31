@@ -56,24 +56,33 @@ module.exports = ( app ) ->
             showing_to:   date.format( to, 'Date' )
 
           if jres.activities? and jres.activities.length
-            for activity in jres.activities
-              if activity.start
-                activity._start = activity.start
+            activities = _.groupBy jres.activities, ( activity ) ->
+              return date.format( moment( activity.start ), 'Date' )
 
-                activity_start = moment( activity.start )
+            for groupName, groupActivities of activities
+              for activity in groupActivities
+                if activity.start
+                  activity._start = activity.start
+                  activity_start = moment( activity.start )
+                  activity.start = date.format( activity_start, 'Time' )
 
-                if not activity.end
-                  activity.humanized = moment.duration( activity_start.diff( moment() ) ).humanize( true )
+                if activity.end
+                  activity._end = activity.end
+                  activity_end = moment( activity.end )
+                  activity.end = date.format( activity_end, 'Time' )
 
-                activity.start = date.format( activity_start, 'Time' )
+                if activity.end
+                  activity_duration_end = activity_end
+                else
+                  activity_duration_end = moment()
 
-              if activity.end
-                activity._end = activity.end
+                activity.duration = date.duration( activity_start,
+                                                   activity_duration_end )
+          else
+            activities= {}
 
-                activity_end = moment( activity.end )
-                activity.end = date.format( activity_end, 'Time' )
+          _.assign( res.data,
+                    activities: activities,
+                    template_data )
 
-                activity.humanized = moment.duration( activity_end.diff( activity_start ) ).humanize()
-
-          _.assign( res.data, jres, template_data )
           res.render( 'start', res.data )
