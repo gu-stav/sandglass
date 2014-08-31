@@ -123,7 +123,17 @@ class Sandglass
         res.data.errors = []
 
         _.each res.errors, ( err ) ->
-          res.data.errors.push( err.toString() )
+          if err.field?
+            errData =
+              field: err.field
+
+          if err.message?
+            if _.isObject( errData )
+              errData.message = err.message
+            else
+              errData = err.message
+
+          res.data.errors.push( errData )
 
         res.status( 400 )
 

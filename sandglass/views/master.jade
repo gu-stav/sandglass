@@ -28,7 +28,11 @@ html(lang="en")
       section.main
         if errors
           ul
-          each error in errors
-            li.message= error
+            each error in errors
+              li.message
+                if error.field
+                  a(href="#" + error.field)= error.message
+                else
+                  span= error
 
         block content

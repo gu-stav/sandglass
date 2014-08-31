@@ -9,4 +9,5 @@ module.exports = ( app ) ->
           res.set( rres.headers )
           res.redirect( '/' )
         .on 'fail', ( jres ) ->
+          jres.req = req.body
           res.render( 'signup', jres )

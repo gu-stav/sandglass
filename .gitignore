@@ -2,3 +2,4 @@ node_modules/
 *.sqlite
 sandglass/static/dist/
 sandglass/static/bower/
+*.sublime-workspace

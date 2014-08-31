@@ -1,6 +1,7 @@
 _ = require( 'lodash' )
 bcrypt = require( 'bcrypt' )
 crypto = require( 'crypto' )
+errors = require( '../errors/index.coffee' )
 Promise = require( 'bluebird' )
 
 module.exports = ( sequelize, DataTypes ) ->
@@ -157,6 +158,12 @@ module.exports = ( sequelize, DataTypes ) ->
           data = req.body
           password = data.password
           email = data.email
+
+          if not email
+            return reject( errors.BadRequest( 'Invalid Email', 'email' ) )
+
+          if not password
+            return reject( errors.BadRequest( 'Invalid password', 'password' ) )
 
           search =
             where:
