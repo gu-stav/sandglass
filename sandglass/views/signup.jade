@@ -20,7 +20,7 @@ block content
   form( action="/login", method="post" )
     div.form-group
       label Email
-      input( type="text", name="email", value= req.email || '' )
+      input( type="text", name="email", value= req ? req.email || '' : '' )
     div.form-group
       label Password
       input( type="password", name="password" )
