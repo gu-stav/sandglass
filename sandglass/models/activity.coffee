@@ -24,12 +24,13 @@ module.exports = ( sequelize, DataTypes ) ->
         @.__models =
           Task: models.Task
           Project: models.Project
+          User: models.User
 
         @.belongsTo( models.User )
         @.belongsTo( models.Project )
         @.belongsTo( models.Task )
 
-      post: ( req ) ->
+      post: ( req, user ) ->
         new Promise ( resolve, reject ) =>
           start = req.body.start or new Date()
           end = req.body.end or undefined
@@ -42,7 +43,10 @@ module.exports = ( sequelize, DataTypes ) ->
 
           @.create( create )
             .then ( activity ) =>
-              activity.setUser( req.user )
+              @.__models.User.get( req, user.id )
+                .then ( user ) ->
+                  activity.setUser( user )
+                    .then( resolve, reject )
                 .then( resolve, reject )
             .catch( reject )
 
