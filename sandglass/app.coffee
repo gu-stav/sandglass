@@ -94,26 +94,19 @@ class Sandglass
 
         next()
 
+      req.getSessionCookie = () ->
+        req.cookies[ app.options.cookie.name ] or undefined
+
       next()
 
     # always preload user, when user-id is involved
     app.sessionAuth = ( req, res, next ) ->
       app.models.User.auth( req )
-        .then ( users ) ->
-          if not users
-            res.error( new Error( 'Not auth' ) )
-
-          user = users.users[0]
-
-          if user
-            req.user = user
-            next()
-          else
-            res.error( new Error( 'Not auth' ) )
-
-        .catch ( err ) ->
-          res.errors.push( err )
+        .then ( user ) ->
+          req.user = user
           next()
+        .catch ( err ) ->
+          res.error( err )
 
     @mount( app, require( './routes/api/index.coffee' )( app ) )
 

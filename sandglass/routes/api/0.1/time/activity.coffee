@@ -5,23 +5,31 @@ Promise = require( 'bluebird' )
 module.exports = ( app ) ->
   express.Router()
     .get app.options.base + '/activities', [ app.sessionAuth ], ( req, res, next ) ->
-      app.models.Activity.get( req )
+      app.models.Activity.get( req, req.user )
         .then( res.success, res.error )
 
     .get app.options.base + '/users/:userId/activities', [ app.sessionAuth ], ( req, res, next ) ->
-      app.models.Activity.get( req )
+      app.models.User.get( req, req.param( 'userId') )
+        .then ( user ) ->
+          app.models.Activity.get( req, user )
         .then( res.success, res.error )
 
     .get app.options.base + '/users/:userId/activities/:activityId', ( req, res, next ) ->
-      app.models.Activity.get( req, req.param( 'activityId' ) )
+      app.models.User.get( req, req.param( 'userId') )
+        .then ( user ) ->
+          app.models.Activity.get( req, user, req.param( 'activityId' ) )
         .then( res.success, res.error )
 
     .put app.options.base + '/users/:userId/activities/:activityId', ( req, res, next ) ->
-      app.models.Activity.update( req, req.param( 'activityId' ) )
+      app.models.User.get( req, req.param( 'userId') )
+        .then ( user ) ->
+          app.models.Activity.update( req, user, req.param( 'activityId' ) )
         .then( res.success, res.error )
 
     .delete app.options.base + '/users/:userId/activities/:activityId', ( req, res, next ) ->
-      app.models.Activity.delete( req, req.param( 'activityId' ) )
+      app.models.User.get( req, req.param( 'userId') )
+        .then( user ) ->
+          app.models.Activity.delete( req, user, req.param( 'activityId' ) )
         .then( res.success, res.error )
 
     .post app.options.base + '/users/:userId/activities', [ app.sessionAuth ], ( req, res, next ) ->

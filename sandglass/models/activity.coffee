@@ -46,9 +46,8 @@ module.exports = ( sequelize, DataTypes ) ->
                 .then( resolve, reject )
             .catch( reject )
 
-      get: ( req, id ) ->
+      get: ( req, user, id ) ->
         new Promise ( resolve, reject ) =>
-          user = req.user
           from = date.fromString( req.param( 'from' ) )
           to = date.fromString( req.param( 'to' ) )
 
@@ -59,13 +58,15 @@ module.exports = ( sequelize, DataTypes ) ->
             to = to.toDate()
 
           search =
-            where:
-              userId: user.id,
+            where: {}
             include: [ @.__models.Task,
                        @.__models.Project ]
             order: [
               [ 'start', 'ASC' ]
             ]
+
+          if user
+            search.where.userId = user.id
 
           if id?
             search.where.id = id
@@ -84,11 +85,15 @@ module.exports = ( sequelize, DataTypes ) ->
               resolve( activities: activities )
             .catch( reject )
 
-      update: ( req, id ) ->
+      update: ( req, user, id ) ->
         new Promise ( resolve, reject ) =>
           data = req.body
+          search =
+            where:
+              id: id
+              userId: user.id
 
-          @.find( id )
+          @.find( search )
             .then ( activity ) ->
               if not activity
                 return reject( new Error( 'Activity not found' ) )
@@ -98,9 +103,14 @@ module.exports = ( sequelize, DataTypes ) ->
                   resolve( activities: [ activity ] )
                 .catch( reject )
 
-      delete: ( req, id ) ->
+      delete: ( req, user, id ) ->
         new Promise ( resolve, reject ) =>
-          @.find( id )
+          search =
+            where:
+              id: id
+              userId: user.id
+
+          @.find( search )
             .then ( activity ) ->
               if not activity
                 return reject( new Error( 'Activity not found' ) )

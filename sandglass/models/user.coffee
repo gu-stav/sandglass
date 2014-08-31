@@ -66,17 +66,14 @@ module.exports = ( sequelize, DataTypes ) ->
 
       auth: ( req ) ->
         return new Promise ( resolve, reject ) =>
-          session = req.cookies.auth
+          session = req.getSessionCookie()
 
           if not session
-            reject( new Error( 'No session was provided' ) )
+            reject( errors.NoPermission( 'No session provided' ) )
 
           @.findBySession( session, { full: true } )
-            .then ( users ) ->
-              if not users or not users.users.length
-                resolve( false )
-              else
-                resolve( users )
+            .then ( user ) ->
+              resolve( user )
 
       post: ( req ) ->
         data = req.body
@@ -112,6 +109,10 @@ module.exports = ( sequelize, DataTypes ) ->
         includes = [ @.__models.Role ]
 
         new Promise ( resolve, reject ) =>
+          # fast path - user was already preloaded
+          if req.user and req.user.id is id
+            return resolve( req.user )
+
           where =
             where:
               id: id
@@ -121,7 +122,7 @@ module.exports = ( sequelize, DataTypes ) ->
             @.find( where )
             .then ( user ) ->
               if not user
-                reject( new Error( 'User not found' ) )
+                return reject( errors.BadRequest( 'User not found' ) )
 
               resolve( users: [ user.render() ] )
           else
@@ -129,16 +130,19 @@ module.exports = ( sequelize, DataTypes ) ->
               include: includes
 
             @.findAll( where )
-              .then ( users ) =>
+              .then ( users ) ->
                 result = []
+
                 for index, user of users
                   result.push( user.render() )
 
+                return result
+              .then ( users ) ->
                 resolve( users: result )
 
       logout: ( req, response ) ->
         new Promise ( resolve, reject ) =>
-          session = req.cookies.auth;
+          session = req.getSessionCookie();
 
           response.clearCookie( @.__app.options.cookie.name )
 
