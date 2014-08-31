@@ -58,12 +58,22 @@ module.exports = ( app ) ->
           if jres.activities? and jres.activities.length
             for activity in jres.activities
               if activity.start
+                activity._start = activity.start
+
                 activity_start = moment( activity.start )
-                activity.start = date.format( activity_start, 'DateTime' )
+
+                if not activity.end
+                  activity.humanized = moment.duration( activity_start.diff( moment() ) ).humanize( true )
+
+                activity.start = date.format( activity_start, 'Time' )
 
               if activity.end
+                activity._end = activity.end
+
                 activity_end = moment( activity.end )
-                activity.end = date.format( activity_end, 'DateTime' )
+                activity.end = date.format( activity_end, 'Time' )
+
+                activity.humanized = moment.duration( activity_end.diff( activity_start ) ).humanize()
 
           _.assign( res.data, jres, template_data )
           res.render( 'start', res.data )

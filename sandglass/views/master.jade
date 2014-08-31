@@ -20,16 +20,13 @@ html(lang="en")
 
         block sidebar
 
-      header.header
-        block header
-        block tracking
-        block user
+      block header
 
       section.main
         if errors
           ul
             each error in errors
-              li.message
+              li.message.message--error
                 if error.field
                   a(href="#" + error.field)= error.message
                 else

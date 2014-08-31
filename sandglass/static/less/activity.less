@@ -6,23 +6,67 @@
   position: relative;
 
   &_time {
-    left: 1rem;
-    overflow: hidden;
+    border-right: 2px solid @border-color;
+    height: 100%;
+    left: 0;
+    padding: 1rem;
     position: absolute;
     text-align: right;
-    top: 1rem;
-    width: 6rem;
+    top: 0;
+    width: 7.5rem;
+
+    &:after {
+      color: @brand-background-color;
+      content: "\f192";
+      font-family: FontAwesome;
+      position: absolute;
+      right: -.5rem;
+      top: .8rem;
+    }
+  }
+
+  &_start,
+  &_end,
+  &_duration {
+    display: block;
+  }
+
+  &_duration {
+    font-weight: bold;
+  }
+
+  &_start,
+  &_end {
+    font-size: .9rem;
   }
 
   &_description {
     font-size: .9rem;
     line-height: 1.5;
-    margin: 0 0 0 7rem;
+    margin-top: 0;
+    margin-bottom: 0;
     width: 100%;
   }
 
-  &_info {
-    margin-left: 7rem;
+  &_info,
+  &_description {
+    margin-left: 8rem;
+  }
+
+  button[name="delete"],
+  button[name="stop_tracking"] {
+    font-size: .9rem;
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+
+    > .fa {
+      margin-right: .2rem;
+    }
+  }
+
+  button[name="stop_tracking"] {
+    right: 5.5rem;
   }
 
   &_project:before {

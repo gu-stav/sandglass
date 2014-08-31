@@ -2,24 +2,28 @@ extends master
 
 block content
   form( action="", method="get" ).range
-    input(name="from", value=showing_from ).range_from
-    input(name="to", value=showing_to ).range_to
-    button(type="submit").btn Submit
-
-  div
     a(href= prev_link).range_prev
       i.fa.fa-arrow-left
-      | Previous
+
+    input(name="from", value=showing_from ).range_from.inp.inp--transparent.inp--width-auto
+    input(name="to", value=showing_to ).range_to.inp.inp--transparent.inp--width-auto
+
+    button(type="submit").btn Submit
+
     a(href= next_link).range_next
-      | Next
       i.fa.fa-arrow-right
+
+    p.range_current-label This week
 
   ul.timeline
     each activity in activities
       li.timeline_item.activity
         div.activity_time
+          span.activity_duration= activity.humanized
           span.activity_start= activity.start
-          span.activity_end= activity.end
+
+          if activity.end
+            span.activity_end= activity.end
 
         div.activity_info
           if activity.task
@@ -41,33 +45,33 @@ block content
 
         p.activity_description= activity.description
 
-block tracking
-  form( action="/activity", method="post" ).track
-    div.form-group
-      input( type="text",
-             name="project",
-             placeholder="Project" ).inp.track_inp.track_inp--first
-    div.form-group
-      input( type="text",
-             name="task",
-             placeholder="Task" ).inp.track_inp.track_inp--second
-    div.form-group
-      input( type="text",
-             name="description",
-             placeholder="Description" ).inp.track_inp.track_inp--third
-    div.form-group
-      button( type="submit" ).btn.track_submit
-        i.fa.fa-clock-o
-        | Submit
+block header
+  header.header
+    form( action="/activity", method="post" ).track
+      div.form-group
+        input( type="text",
+               name="project",
+               placeholder="Project" ).inp.track_inp.track_inp--first
+      div.form-group
+        input( type="text",
+               name="task",
+               placeholder="Task" ).inp.track_inp.track_inp--second
+      div.form-group
+        input( type="text",
+               name="description",
+               placeholder="Description" ).inp.track_inp.track_inp--third
+      div.form-group
+        button( type="submit" ).btn.track_submit
+          i.fa.fa-clock-o
+          | Submit
 
-block user
-  if user
-    div.header_user
-      i.fa.fa-user.header_user-image
-      strong.header_user-name= user.name
-      a.header_user-logout(href="/logout")
-        | Logout
-        i.fa.fa-sign-out
+    if user
+      div.header_user
+        i.fa.fa-user.header_user-image
+        strong.header_user-name= user.name
+        a.header_user-logout(href="/logout")
+          | Logout
+          i.fa.fa-sign-out
 
 block sidebar
   nav.navigation

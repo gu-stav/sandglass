@@ -1,0 +1,18 @@
+.message {
+  border: 1px solid @border-color;
+  border-radius: 4px;
+  padding: .6rem;
+
+  & + & {
+    margin-top: .5rem;
+  }
+
+  &--error {
+    background-color: @message-error-background-color;
+    border-color: darken( @message-error-background-color, 30% );
+
+    > a {
+      color: darken( @message-error-background-color, 50% );
+    }
+  }
+}

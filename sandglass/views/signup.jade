@@ -1,7 +1,6 @@
 extends master
 
 block content
-
   h2 Signup
   form( action="/signup", method="post" )
     div.form-group
@@ -20,9 +19,14 @@ block content
   form( action="/login", method="post" )
     div.form-group
       label Email
-      input( type="text", name="email", value= req ? req.email || '' : '' )
+      input( id="email"
+             type="text",
+             name="email",
+             value= req ? req.email || '' : '' )
     div.form-group
       label Password
-      input( type="password", name="password" )
+      input( id="password",
+             type="password",
+             name="password" )
     div.form-group
       button( type="submit" ) Login

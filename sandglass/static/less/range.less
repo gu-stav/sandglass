@@ -1,5 +1,37 @@
 .range {
-  &_to:before {
-    content: " - ";
+  max-width: 14em;
+
+  .btn {
+    display: none;
+  }
+
+  .inp {
+    width: 5.5em;
+  }
+
+  &_from {
+    margin-left: .5rem;
+  }
+
+  &_to {
+    margin-right: .5rem;
+    text-align: right;
+  }
+
+  &_next,
+  &_prev {
+    color: @brand-background-color;
+
+    &:hover,
+    &:focus {
+      color: @box-color;
+    }
+  }
+
+  &_current-label {
+    font-size: .9rem;
+    margin: .3rem 0 0 0;
+    text-align: center;
+    text-transform: uppercase;
   }
 }
