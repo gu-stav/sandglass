@@ -36,11 +36,11 @@ block content
                   span.activity_end= '-' + activity.end
 
               div.activity_info
-                if activity.task
-                  strong.activity_task= activity.task.title
+                if activity.Task
+                  strong.activity_task= activity.Task.title
 
-                if activity.project
-                  strong.activity_project= activity.project.title
+                if activity.Project
+                  strong.activity_project= activity.Project.title
 
                 if !activity.end
                   form( action="/activity/" + activity.id + "/stop", method="post" )

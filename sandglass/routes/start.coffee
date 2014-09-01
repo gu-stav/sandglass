@@ -12,7 +12,6 @@ module.exports = ( app ) ->
   router = express.Router()
     .get '/', [ app.sessionAuth ], ( req, res, next ) ->
       userId = res.data.user.id
-      userSession = res.data.user.session
 
       if not req.param( 'from' )
         from = moment().subtract( 1, 'weeks' )
@@ -30,10 +29,8 @@ module.exports = ( app ) ->
       get_data = '?from=' + encode( date.format( from ) ) +
                  '&to=' + encode( date.format( to ) )
 
-      rest
-        .get( app.options.host + '/users/' + userId + '/activities' + get_data, data )
+      rest.get( app.options.host + '/users/' + userId + '/activities' + get_data, data )
         .on 'complete', ( jres, err ) ->
-
           week_ahead = to.clone().add( 1, 'weeks' )
           week_ahead_start = to.clone()
 

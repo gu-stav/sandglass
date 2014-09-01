@@ -54,7 +54,9 @@ module.exports = ( sequelize, DataTypes ) ->
                 activity.setUser( context_user )
               else
                 return activity
-            .then( resolve, reject )
+            .then ( activity ) ->
+              resolve( activities: [ activity ] )
+            .catch( reject )
 
       get: ( req, context, id ) ->
         includes = [ @.__models.Task,

@@ -28,7 +28,7 @@ module.exports = ( app ) ->
 
     .delete app.options.base + '/users/:userId/activities/:activityId', ( req, res, next ) ->
       app.models.User.get( req, req.param( 'userId'), single: true )
-        .then( user ) ->
+        .then ( user ) ->
           app.models.Activity.delete( req, user: user, req.param( 'activityId' ) )
         .then( res.success, res.error )
 
@@ -42,15 +42,10 @@ module.exports = ( app ) ->
       app.models.User.get( req, req.param('userId' ), single: true )
         .then ( user ) ->
           new Promise ( resolve, reject ) ->
-            app.models.Activity.get( req, user: user, req.param( 'activityId') )
-              .then ( activity ) ->
-                context =
-                  activity: activity
-                  user: user
-
-                resolve( context, activity )
-
-        .spread ( context, activity ) ->
+            app.models.Activity.get( req, user: user, req.param( 'activityId' ) )
+              .then ( activities ) ->
+                resolve( { activity: activities.activities[ 0 ], user: user } )
+        .then ( context ) ->
           app.models.Task.post( req, context )
         .then( res.success, res.error )
 
@@ -58,14 +53,9 @@ module.exports = ( app ) ->
       app.models.User.get( req, req.param('userId' ), single: true )
         .then ( user ) ->
           new Promise ( resolve, reject ) ->
-            app.models.Activity.get( req, user: user, req.param( 'activityId') )
-              .then ( activity ) ->
-                context =
-                  activity: activity
-                  user: user
-
-                resolve( context, activity )
-
-        .spread ( context, activity ) ->
+            app.models.Activity.get( req, user: user, req.param( 'activityId' ) )
+              .then ( activities ) ->
+                resolve( { activity: activities.activities[ 0 ], user: user } )
+        .then ( context ) ->
           app.models.Project.post( req, context )
         .then( res.success, res.error )

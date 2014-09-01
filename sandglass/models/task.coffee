@@ -19,45 +19,46 @@ module.exports = ( sequelize, DataTypes ) ->
           User:models.User
 
       post: ( req, context ) ->
-        return new Promise ( resolve, reject ) =>
+        new Promise ( resolve, reject ) =>
           title = req.body.title
-
-          if context? and context.user?
-            context_user = context.user
-
-          if context? and context.activity?
-            context_activity = context.activity
-
-          create =
-            title: title
 
           find =
             where:
               title: title
 
-          if context_user
+          if context? and context.user?
+            context_user = context.user
             find.where.UserId = context_user.id
 
-          if context_activity
-            find.where.ActivityId = context_activity.id
+          if context? and context.activity?
+            context_activity = context.activity
 
-          @.findOrCreate( find, create )
+          @.find( find )
+            .then ( task ) =>
+              task or @.create( title: title )
+
             # set user
             .then ( task ) ->
-              if context_user?
-                task.setUser( context_user )
-              else
-                task
+              if not context_user
+                return task
+
+              task.setUser( context_user )
+
             # set activity
             .then ( task ) ->
-              if context_activity?
-                task.setActivity( context_activity )
-              else
-                task
-            .then( resolve, reject )
+              if not context_activity
+                return task
+
+              new Promise ( resolve, reject ) ->
+                context_activity.setTask( task )
+                  .then( resolve( task ), reject )
+
+            .then ( task ) ->
+              resolve( tasks: [ task ] )
+            .catch( reject )
 
       get: ( req, context, id ) ->
-        return new Promise ( resolve, reject ) =>
+        new Promise ( resolve, reject ) =>
           find =
             where: {}
 
