@@ -51,19 +51,20 @@ module.exports = ( sequelize, DataTypes ) ->
         options = _.defaults( options || {}, full: false )
 
         new Promise ( resolve, reject ) =>
-          search =
+          find =
             where:
               session: session
 
-          this.find( search )
+          this.find( find )
             .then ( user ) ->
               if not user
                 return reject( new Error( 'User not found' ) )
 
               if not options.full
                 user = user.render()
-
-              resolve( users: [ user ] )
+                return resolve( users: [ user ] )
+              else
+                return resolve( user )
 
       auth: ( req ) ->
         return new Promise ( resolve, reject ) =>
@@ -73,8 +74,7 @@ module.exports = ( sequelize, DataTypes ) ->
             reject( errors.NoPermission( 'No session provided' ) )
 
           @.findBySession( session, { full: true } )
-            .then ( user ) ->
-              resolve( user )
+            .then( resolve, reject )
 
       post: ( req ) ->
         data = req.body
@@ -110,40 +110,29 @@ module.exports = ( sequelize, DataTypes ) ->
         includes = [ @.__models.Role ]
 
         new Promise ( resolve, reject ) =>
-
           # fast path - user was already preloaded
           if req.user and req.user.id is id
-            return resolve( req.user )
+            if options? and options.single?
+              return resolve( req.user )
 
-          where =
-            where:
-              id: id
+            resolve( users: req.user.render() )
+
+          find =
+            where: {}
             include: includes
 
-          if id
-            @.find( where )
-            .then ( user ) ->
-              if not user
-                return reject( errors.BadRequest( 'User not found' ) )
+          if id?
+            find.where.id = id
 
-              if options? and options.single?
-                return resolve( user.render() )
+          @.findAll( find )
+            .then ( users ) ->
+              if not users
+                return resolve( users: [] )
 
-              resolve( users: [ user.render() ] )
-          else
-            where =
-              include: includes
+              if users.length is 1 and ( options? and options.single? )
+                return resolve( users[ 0 ] )
 
-            @.findAll( where )
-              .then ( users ) ->
-                result = []
-
-                for index, user of users
-                  result.push( user.render() )
-
-                return result
-              .then ( users ) ->
-                resolve( users: result )
+              resolve( users: ( user.render() for user in users ) )
 
       logout: ( req, response ) ->
         new Promise ( resolve, reject ) =>

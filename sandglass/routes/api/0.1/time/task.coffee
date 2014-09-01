@@ -9,11 +9,11 @@ module.exports = ( app ) ->
     .get app.options.base + '/users/:userId/tasks', [ app.sessionAuth ], ( req, res, next ) ->
       app.models.User.get( req, req.param( 'userId'), single: true )
         .then ( user ) ->
-          app.models.Task.get( req, user )
+          app.models.Task.get( req, user: user )
         .then( res.success, res.error )
 
     .get app.options.base + '/users/:userId/tasks/:taskId', [ app.sessionAuth ], ( req, res, next ) ->
       app.models.User.get( req, req.param( 'userId'), single: true )
         .then ( user ) ->
-          app.models.Task.get( req, user, req.param( 'taskId' ) )
+          app.models.Task.get( req, user: user, req.param( 'taskId' ) )
         .then( res.success, res.error )

@@ -15,5 +15,5 @@ module.exports = ( app ) ->
     .get app.options.base + '/users/:userId/projects/:projectId', [ app.sessionAuth ], ( req, res, next ) ->
       app.models.User.get( req, req.param( 'userId'), single: true )
         .then ( user ) ->
-          app.models.Project.get( req, user, req.param( 'projectId' ) )
+          app.models.Project.get( req, user: user, req.param( 'projectId' ) )
         .then( res.success, res.error )

@@ -1,3 +1,4 @@
+errors = require( '../errors/index.coffee' )
 date = require( '../utils/date.coffee' )
 moment = require( 'moment' )
 Promise = require( 'bluebird' )
@@ -33,11 +34,14 @@ module.exports = ( sequelize, DataTypes ) ->
 
         @.hasMany( models.Tag )
 
-      post: ( req, user ) ->
+      post: ( req, context ) ->
         new Promise ( resolve, reject ) =>
           start = req.body.start or new Date()
           end = req.body.end or undefined
           description = req.body.description or ''
+
+          if context? and context.user?
+            context_user = context.user
 
           create =
             start: start
@@ -46,14 +50,13 @@ module.exports = ( sequelize, DataTypes ) ->
 
           @.create( create )
             .then ( activity ) =>
-              @.__models.User.get( req, user.id, single: true )
-                .then ( user ) ->
-                  activity.setUser( user )
-                    .then( resolve, reject )
-                .then( resolve, reject )
-            .catch( reject )
+              if context_user
+                activity.setUser( context_user )
+              else
+                return activity
+            .then( resolve, reject )
 
-      get: ( req, user, id ) ->
+      get: ( req, context, id ) ->
         includes = [ @.__models.Task,
                      @.__models.Project,
                      @.__models.Tag ]
@@ -61,6 +64,19 @@ module.exports = ( sequelize, DataTypes ) ->
         new Promise ( resolve, reject ) =>
           from = req.param( 'from' )
           to = req.param( 'to' )
+          find =
+            where: {}
+            include: includes
+            order: [
+              [ 'start', 'ASC' ]
+            ]
+
+          if id?
+            find.where.id = id
+
+          if context? and context.user?
+            context_user = context.user
+            find.where.UserId = context_user.id
 
           if from
             from = date.fromString( from ).toDate()
@@ -68,78 +84,58 @@ module.exports = ( sequelize, DataTypes ) ->
           if to
             to = date.fromString( to ).toDate()
 
-          search =
-            where: {}
-            include: includes
-            order: [
-              [ 'start', 'ASC' ]
-            ]
-
-          if user?
-            search.where.UserId = user.id
-
-          if id?
-            search.where.id = id
-
           if from? and to?
-            search.where.start = between: [ from, to ]
+            find.where.start = between: [ from, to ]
           else
             if from?
-              search.where.start = gt: from
+              find.where.start = gt: from
 
             if to?
-              search.where.start = lt: to
+              find.where.start = lt: to
 
-          @.findAll( search )
+          @.findAll( find )
             .then ( activities ) ->
               resolve( activities: activities )
             .catch( reject )
 
-      update: ( req, user, id ) ->
+      update: ( req, context, id ) ->
         new Promise ( resolve, reject ) =>
           data = req.body
-          search =
+          find =
             where:
               id: id
-              userId: User.id
 
-          @.find( search )
+          if context? and context.user?
+            find.where.UserId = context.user.id
+
+          @.find( find )
             .then ( activity ) ->
               if not activity
-                return reject( new Error( 'Activity not found' ) )
+                return reject( errors.BadRequest( 'Activity not found' ) )
 
               activity.updateAttributes( data )
                 .then ( activity ) ->
                   resolve( activities: [ activity ] )
                 .catch( reject )
 
-      delete: ( req, user, id ) ->
+      delete: ( req, context, id ) ->
         new Promise ( resolve, reject ) =>
-          search =
+          find =
             where:
               id: id
-              userId: User.id
 
-          @.find( search )
+          if context? and context.user?
+            find.where.UserId = context.user.id
+
+          @.find( find )
             .then ( activity ) ->
               if not activity
-                return reject( new Error( 'Activity not found' ) )
+                return reject( errors.BadRequest( 'Activity not found' ) )
 
               activity.destroy()
                 .then ( activity ) ->
                   resolve( activities: [ activity ] )
                 .catch( reject )
-
-    instanceMethods:
-      addInstance: ( model, req, user ) ->
-        new Promise ( resolve, reject ) =>
-          model.post( req, user )
-            .then ( inst ) =>
-              if not inst
-                resolve( @ )
-
-              @[ 'set' + model.name ]( inst )
-                .then( resolve, reject )
     }
 
   )

@@ -19,51 +19,52 @@ module.exports = ( sequelize, DataTypes ) ->
         @.__models =
           User:models.User
 
-      post: ( req, user ) ->
+      post: ( req, context ) ->
         return new Promise ( resolve, reject ) =>
           title = req.body.title
-
-          if not title
-            return resolve()
 
           create =
             title: title
 
-          where =
+          find =
             where:
               title: req.body.title
 
-          if user?
-            where.where.UserId = user.id
+          if context? and context.user?
+            context_user = context.user
+            find.where.UserId = context.user.id
 
-          @.find( where )
-            .then ( project ) =>
-              if not project
-                @.create( create )
-                  .then ( project ) =>
-                    if not user?
-                      return resolve( project )
+          if context? and context.activity?
+            context_activity = context.activity
 
-                    @.__models.User.get( req, user.id, single: true )
-                      .then ( user ) ->
-                        project.setUser( user )
-                          .then( resolve, reject )
-                  .then( resolve, reject )
+          @.findOrCreate( find, create )
+            .then ( project ) ->
+              if context_user
+                project.setUser( context_user )
               else
-                resolve( project )
+                project
+            .then ( project ) ->
+              if context_activity
+                project.setActivity( context_activity )
+              else
+                project
+            .then( resolve, reject )
 
-      get: ( req, user, id ) ->
+      get: ( req, context, id ) ->
         return new Promise ( resolve, reject ) =>
-          where =
+          find =
             where: {}
 
-          if user?
-            where.where.UserId = user.id
+          if context? and context.user?
+            find.where.UserId = context.user.id
+
+          if context? and context.activity?
+            find.where.ActivityId = context.activity.id
 
           if id?
-            where.where.id = id
+            find.where.id = id
 
-          @.findAll( where )
+          @.findAll( find )
             .then ( projects ) ->
               resolve( projects: projects )
     }
