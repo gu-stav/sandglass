@@ -7,13 +7,13 @@ module.exports = ( app ) ->
         .then( res.success, res.error )
 
     .get app.options.base + '/users/:userId/projects', [ app.sessionAuth ], ( req, res, next ) ->
-      app.models.User.get( req, req.param( 'userId') )
+      app.models.User.get( req, req.param( 'userId'), single: true )
         .then ( user ) ->
           app.models.Project.get( req, user )
         .then( res.success, res.error )
 
     .get app.options.base + '/users/:userId/projects/:projectId', [ app.sessionAuth ], ( req, res, next ) ->
-      app.models.User.get( req, req.param( 'userId') )
+      app.models.User.get( req, req.param( 'userId'), single: true )
         .then ( user ) ->
           app.models.Project.get( req, user, req.param( 'projectId' ) )
         .then( res.success, res.error )
