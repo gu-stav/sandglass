@@ -2,7 +2,8 @@ Promise = require( 'bluebird' )
 rest = require( 'restler' )
 sqlite = require( 'sqlite3' )
 
-frontend_conf = require( '../config-frontend.json' )
+#Todo
+frontend_conf = require( '../config-frontend.json' ).development
 api_conf = require( '../config-api.json' )
 
 module.exports = ( username, password, file ) ->

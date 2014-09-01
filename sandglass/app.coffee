@@ -159,7 +159,7 @@ class Sandglass
 
   # API-Fixtures
   setupFixtures: ( app )->
-    new Promise ( resolve, reject ) =>
+    new Promise ( resolve, reject ) ->
       role =
         body:
           name: 'Admin'
@@ -174,7 +174,7 @@ class Sandglass
 
       app.models.Role
         .post( role )
-        .then ( role ) =>
+        .then ( role ) ->
           app.models.User.post( user )
         .then( resolve, reject )
 
