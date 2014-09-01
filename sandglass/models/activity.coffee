@@ -59,7 +59,7 @@ module.exports = ( sequelize, DataTypes ) ->
             from = date.fromString( from ).toDate()
 
           if to
-            to = date.fromString( to ).to.toDate()
+            to = date.fromString( to ).toDate()
 
           search =
             where: {}

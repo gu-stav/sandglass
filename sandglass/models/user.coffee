@@ -105,7 +105,7 @@ module.exports = ( sequelize, DataTypes ) ->
                 .then ( user ) ->
                   resolve( users: [ user.render() ] )
 
-      get: ( req, id ) ->
+      get: ( req, id, options ) ->
         includes = [ @.__models.Role ]
 
         new Promise ( resolve, reject ) =>
@@ -125,7 +125,10 @@ module.exports = ( sequelize, DataTypes ) ->
               if not user
                 return reject( errors.BadRequest( 'User not found' ) )
 
-              resolve( user.render() )
+              if options? and options.single?
+                return resolve( user.render() )
+
+              resolve( users: [ user.render() ] )
           else
             where =
               include: includes

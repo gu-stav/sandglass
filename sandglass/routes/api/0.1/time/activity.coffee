@@ -9,31 +9,31 @@ module.exports = ( app ) ->
         .then( res.success, res.error )
 
     .get app.options.base + '/users/:userId/activities', [ app.sessionAuth ], ( req, res, next ) ->
-      app.models.User.get( req, req.param( 'userId') )
+      app.models.User.get( req, req.param( 'userId'), single: true )
         .then ( user ) ->
           app.models.Activity.get( req, user )
         .then( res.success, res.error )
 
     .get app.options.base + '/users/:userId/activities/:activityId', ( req, res, next ) ->
-      app.models.User.get( req, req.param( 'userId') )
+      app.models.User.get( req, req.param( 'userId'), single: true )
         .then ( user ) ->
           app.models.Activity.get( req, user, req.param( 'activityId' ) )
         .then( res.success, res.error )
 
     .put app.options.base + '/users/:userId/activities/:activityId', ( req, res, next ) ->
-      app.models.User.get( req, req.param( 'userId') )
+      app.models.User.get( req, req.param( 'userId'), single: true )
         .then ( user ) ->
           app.models.Activity.update( req, user, req.param( 'activityId' ) )
         .then( res.success, res.error )
 
     .delete app.options.base + '/users/:userId/activities/:activityId', ( req, res, next ) ->
-      app.models.User.get( req, req.param( 'userId') )
+      app.models.User.get( req, req.param( 'userId'), single: true )
         .then( user ) ->
           app.models.Activity.delete( req, user, req.param( 'activityId' ) )
         .then( res.success, res.error )
 
     .post app.options.base + '/users/:userId/activities', [ app.sessionAuth ], ( req, res, next ) ->
-      app.models.User.get( req, req.param( 'userId') )
+      app.models.User.get( req, req.param( 'userId'), single: true )
         .then ( user ) ->
           app.models.Activity.post( req, user )
             # set task
