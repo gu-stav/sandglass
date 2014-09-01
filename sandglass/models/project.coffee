@@ -26,6 +26,8 @@ module.exports = ( sequelize, DataTypes ) ->
           find =
             where:
               title: req.body.title
+            defaults:
+              title: title
 
           if context? and context.user?
             context_user = context.user
@@ -34,12 +36,9 @@ module.exports = ( sequelize, DataTypes ) ->
           if context? and context.activity?
             context_activity = context.activity
 
-          @.find( find )
-            .then ( project ) =>
-              project or @.create( title: title )
-
+          @.findOrCreate( find )
             # set user
-            .then ( project ) ->
+            .spread ( project, created ) ->
               if not context_user
                 return project
 
