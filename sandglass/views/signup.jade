@@ -1,32 +1,36 @@
 extends master
 
 block content
-  h2 Signup
-  form( action="/signup", method="post" )
-    div.form-group
-      label Email
-      input( type="text", name="email" )
-    div.form-group
-      label Name
-      input( type="text", name="name" )
-    div.form-group
-      label Password
-      input( type="password", name="_rawPassword" )
-    div.form-group
-      button( type="submit" ) Signup
+  div.grid
+    form( action="/login", method="post" ).login.form
+      h2 Login
+      div.form_group
+        input( id="email"
+               type="text",
+               name="email",
+               placeholder="Email"
+               value= req ? req.email || '' : '' ).inp
+      div.form_group
+        input( id="password",
+               type="password",
+               name="password",
+               placeholder="Password" ).inp
+      div.form_group
+        button( type="submit" ).btn Login
 
-  h2 Login
-  form( action="/login", method="post" )
-    div.form-group
-      label Email
-      input( id="email"
-             type="text",
-             name="email",
-             value= req ? req.email || '' : '' )
-    div.form-group
-      label Password
-      input( id="password",
-             type="password",
-             name="password" )
-    div.form-group
-      button( type="submit" ) Login
+    form( action="/signup", method="post" ).signup.form
+      h2 Signup
+      div.form_group
+        input( type="text",
+               name="email",
+               placeholder="Email" ).inp
+      div.form_group
+        input( type="text",
+               name="name",
+               placeholder="Name" ).inp
+      div.form_group
+        input( type="password",
+               name="_rawPassword",
+               placeholder="Password" ).inp
+      div.form_group
+        button( type="submit" ).btn Signup

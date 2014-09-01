@@ -25,12 +25,29 @@
   }
 }
 
+.form {
+  &_group + &_group {
+    margin-top: .5rem;
+  }
+}
+
 .btn {
   background-color: @brand-background-color;
   border: 1px solid darken( @brand-background-color, 8% );
   border-radius: 4px;
   color: @brand-color;
   padding: .4rem 1rem;
+
+  &:hover,
+  &:focus {
+    background-color: darken( @brand-background-color, 5% );
+    border-color: darken( @brand-background-color, 13% );
+  }
+
+  &:active {
+    background-color: darken( @brand-background-color, 10% );
+    border-color: darken( @brand-background-color, 18% );
+  }
 }
 
 .btn--transparent {
