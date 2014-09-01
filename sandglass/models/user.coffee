@@ -45,6 +45,7 @@ module.exports = ( sequelize, DataTypes ) ->
         @.hasOne( models.Activity )
         @.hasOne( models.Project )
         @.hasOne( models.Task )
+        @.hasOne( models.Tag )
 
       findBySession: ( session, options ) ->
         options = _.defaults( options || {}, full: false )

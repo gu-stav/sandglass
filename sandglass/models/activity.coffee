@@ -24,11 +24,14 @@ module.exports = ( sequelize, DataTypes ) ->
         @.__models =
           Task: models.Task
           Project: models.Project
+          Tag: models.Tag
           User: models.User
 
         @.belongsTo( models.User )
         @.belongsTo( models.Project )
         @.belongsTo( models.Task )
+
+        @.hasMany( models.Tag )
 
       post: ( req, user ) ->
         new Promise ( resolve, reject ) =>
@@ -43,7 +46,7 @@ module.exports = ( sequelize, DataTypes ) ->
 
           @.create( create )
             .then ( activity ) =>
-              @.__models.User.get( req, user.id )
+              @.__models.User.get( req, user.id, single: true )
                 .then ( user ) ->
                   activity.setUser( user )
                     .then( resolve, reject )
@@ -51,6 +54,10 @@ module.exports = ( sequelize, DataTypes ) ->
             .catch( reject )
 
       get: ( req, user, id ) ->
+        includes = [ @.__models.Task,
+                     @.__models.Project,
+                     @.__models.Tag ]
+
         new Promise ( resolve, reject ) =>
           from = req.param( 'from' )
           to = req.param( 'to' )
@@ -63,8 +70,7 @@ module.exports = ( sequelize, DataTypes ) ->
 
           search =
             where: {}
-            include: [ @.__models.Task,
-                       @.__models.Project ]
+            include: includes
             order: [
               [ 'start', 'ASC' ]
             ]

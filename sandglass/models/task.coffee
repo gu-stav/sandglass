@@ -45,7 +45,7 @@ module.exports = ( sequelize, DataTypes ) ->
                     if not user?
                       return resolve( task )
 
-                    @.__models.User.get( req, user.id )
+                    @.__models.User.get( req, user.id, single: true )
                       .then ( user ) ->
                         task.setUser( user )
                           .then( resolve, reject )
