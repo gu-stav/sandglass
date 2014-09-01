@@ -1,13 +1,15 @@
 {
-  "base": "/api/0.1",
-  "cookie": {
-    "name": "auth",
-    "options": {
-      "expires": "8640000",
-      "httpOnly": "true"
+  "development": {
+    "base": "/api/0.1",
+    "cookie": {
+      "name": "auth",
+      "options": {
+        "expires": "8640000",
+        "httpOnly": "true"
+      }
+    },
+    "server": {
+      "port": "3000"
     }
-  },
-  "server": {
-    "port": "3000"
   }
 }

@@ -1,10 +1,12 @@
 {
-  "name": "",
-  "username": "root",
-  "password": "",
-  "host": "localhost",
-  "options": {
-          "dialect": "sqlite",
-          "storage": "sandglass.sqlite"
+  "development": {
+    "name": "",
+    "username": "root",
+    "password": "",
+    "host": "localhost",
+    "options": {
+            "dialect": "sqlite",
+            "storage": "sandglass.sqlite"
+    }
   }
 }

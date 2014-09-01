@@ -12,21 +12,22 @@ class Sandglass
       headless: false
       fixtures: process.env.FIXTURES || false
       migrations: process.env.MIGRATIONS || false
+      enviroment: process.env.ENVIROMENT || 'development'
 
-    defaults.api      = require( '../config-api.json' )
-    defaults.frontend = require( '../config-frontend.json' )
-    defaults.db       = require( '../config-database.json' )
+    defaults.api      = require( '../config-api.json' )[ defaults.enviroment ]
+    defaults.frontend = require( '../config-frontend.json' )[ defaults.enviroment ]
+    defaults.db       = require( '../config-database.json' )[ defaults.enviroment ]
 
     defaults.api.cookie.options.expires =
         new Date( Date.now() + parseInt( defaults.api.cookie.options.expires ) )
 
     @options = defaults
 
-  setupDatabase: () ->
-    new Sequelize( @options.db.name,
-                   @options.db.username,
-                   @options.db.password,
-                   @options.db.options )
+  setupDatabase: ( opt ) ->
+    new Sequelize( opt.name,
+                   opt.username,
+                   opt.password,
+                   opt.options )
 
   setupViews: ( app ) =>
     app.options = @options.frontend
@@ -69,7 +70,7 @@ class Sandglass
   setupAPI: ( app ) ->
     app.options = @options.api
 
-    app.db = @setupDatabase( app )
+    app.db = @setupDatabase( @options.db )
     app.models = @setupModels( app.db, app )
 
     @setupMiddleware( app )

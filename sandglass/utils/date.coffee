@@ -1,5 +1,6 @@
 moment = require( 'moment' )
-config = require( '../../config-frontend.json' )
+# TODO
+config = require( '../../config-frontend.json' ).development
 
 getFormat = ( type ) ->
   if not type
