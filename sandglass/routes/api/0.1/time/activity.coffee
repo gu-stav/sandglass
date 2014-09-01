@@ -11,7 +11,7 @@ module.exports = ( app ) ->
     .get app.options.base + '/users/:userId/activities', [ app.sessionAuth ], ( req, res, next ) ->
       app.models.User.get( req, req.param( 'userId'), single: true )
         .then ( user ) ->
-          app.models.Activity.get( req, user )
+          app.models.Activity.get( req, user: user )
         .then( res.success, res.error )
 
     .get app.options.base + '/users/:userId/activities/:activityId', ( req, res, next ) ->
