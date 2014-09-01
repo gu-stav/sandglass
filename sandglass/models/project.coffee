@@ -55,7 +55,6 @@ module.exports = ( sequelize, DataTypes ) ->
 
             .then ( project ) ->
               resolve( projects: [ project ] )
-            .catch( reject )
 
       get: ( req, context, id ) ->
         new Promise ( resolve, reject ) =>

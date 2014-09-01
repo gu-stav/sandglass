@@ -54,7 +54,6 @@ module.exports = ( sequelize, DataTypes ) ->
 
             .then ( task ) ->
               resolve( tasks: [ task ] )
-            .catch( reject )
 
       get: ( req, context, id ) ->
         new Promise ( resolve, reject ) =>
