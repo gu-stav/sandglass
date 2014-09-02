@@ -38,10 +38,15 @@ module.exports = ( app ) ->
 
       createActivity()
         .then ( activity ) ->
-          Promise.all([
-            createTask( activity ),
-            createProject( activity ),
-          ])
+          new Promise ( resolve, reject ) ->
+            createTask( activity )
+              .then ( task ) ->
+                resolve( activity )
+        .then ( activity ) ->
+          new Promise ( resolve, reject ) ->
+            createProject( activity )
+              .then ( project ) ->
+                resolve( activity )
         .then () ->
           res.redirect( 'back' )
 

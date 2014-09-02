@@ -60,12 +60,24 @@ block header
     form( action="/activity", method="post" ).track
       div.form-group
         input( type="text",
+               list="track_projects",
                name="project",
                placeholder="Project" ).inp.track_inp.track_inp--first
+
+        datalist#track_projects
+          each project in projects
+            option(value= project.title)
+
       div.form-group
         input( type="text",
+               list="track_tasks"
                name="task",
                placeholder="Task" ).inp.track_inp.track_inp--second
+
+        datalist#track_tasks
+          each task in tasks
+            option(value= task.title)
+
       div.form-group
         input( type="text",
                name="description",
