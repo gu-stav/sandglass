@@ -21,10 +21,12 @@ class Sandglass
 
     @options = defaults
 
+  getEnviroment: () ->
+    process.env.ENVIROMENT || 'development'
+
   # read a certain config file
   getConfig: ( index ) ->
-    enviroment = process.env.ENVIROMENT || 'development'
-    require( '../config-' + index + '.json' )[ enviroment ]
+    require( '../config-' + index + '.json' )[ @.getEnviroment() ]
 
   # returns database-connection object
   setupDatabase: ( opt ) ->
@@ -79,6 +81,9 @@ class Sandglass
 
     app.db = @setupDatabase( @.getConfig( 'database' ) )
     app.models = @setupModels( app.db, app )
+
+    if @.getEnviroment() is 'development'
+      app.set( 'json spaces', 2 )
 
     @setupMiddleware( app )
 
