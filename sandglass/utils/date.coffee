@@ -39,22 +39,18 @@ duration = ( start, end ) ->
   diff = moment( end ).diff( start )
 
   if diff > 3600000
-    hours = diff / 3600000
-    minutes = diff - ( hours * 3600000 ) / 60000
+    hours = parseInt( diff / 3600000 )
+    minutes = parseInt( ( diff - ( hours * 3600000 ) ) / 60000 )
+    "#{hours}h #{minutes}min"
 
-  if diff > 60000
-    minutes = diff / 60000
   else
-    seconds = diff / 1000
+    if diff > 60000
+      minutes = parseInt( diff / 60000 )
+      "#{minutes}min"
 
-  if hours
-    return hours + 'h '
-  else
-    if minutes
-      return parseInt( minutes ) + 'min'
     else
-      return parseInt( seconds ) + 'sec'
-
+      seconds = parseInt( diff / 1000 )
+      "#{seconds}sec"
 
 module.exports =
   duration: duration

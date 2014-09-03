@@ -49,6 +49,7 @@ module.exports = ( sequelize, DataTypes ) ->
             description: description
 
           @.create( create )
+            .catch( reject )
             .then ( activity ) =>
               if context_user
                 activity.setUser( context_user )
@@ -56,7 +57,6 @@ module.exports = ( sequelize, DataTypes ) ->
                 return activity
             .then ( activity ) ->
               resolve( activities: [ activity ] )
-            .catch( reject )
 
       get: ( req, context, id ) ->
         includes = [ @.__models.Task,
@@ -97,8 +97,10 @@ module.exports = ( sequelize, DataTypes ) ->
 
           @.findAll( find )
             .then ( activities ) ->
+              if not activities and not activities.length
+                reject( errors.NotFound( 'Activity' ) )
+
               resolve( activities: activities )
-            .catch( reject )
 
       update: ( req, context, id ) ->
         new Promise ( resolve, reject ) =>
@@ -113,7 +115,7 @@ module.exports = ( sequelize, DataTypes ) ->
           @.find( find )
             .then ( activity ) ->
               if not activity
-                return reject( errors.BadRequest( 'Activity not found' ) )
+                return reject( errors.NotFound( 'Activity' ) )
 
               activity.updateAttributes( data )
                 .then ( activity ) ->
@@ -132,7 +134,7 @@ module.exports = ( sequelize, DataTypes ) ->
           @.find( find )
             .then ( activity ) ->
               if not activity
-                return reject( errors.BadRequest( 'Activity not found' ) )
+                return reject( errors.NotFound( 'Activity not found' ) )
 
               activity.destroy()
                 .then ( activity ) ->
