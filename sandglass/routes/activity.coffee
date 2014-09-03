@@ -15,8 +15,7 @@ module.exports = ( app ) ->
               resolve( result.activities[ 0 ] )
 
       createTask = ( activity ) ->
-        url = "#{app.options.host}/users/#{res.data.user.id}/
-               activities/#{activity.id}/tasks"
+        url = "#{app.options.host}/users/#{res.data.user.id}/activities/#{activity.id}/tasks"
 
         data =
           title: req.body.task
@@ -27,8 +26,7 @@ module.exports = ( app ) ->
               resolve( result.tasks )
 
       createProject = ( activity ) ->
-        url = "#{app.options.host}/users/#{res.data.user.id}/
-               activities/#{activity.id}/projects"
+        url = "#{app.options.host}/users/#{res.data.user.id}/activities/#{activity.id}/projects"
 
         data =
           title: req.body.project
@@ -54,22 +52,20 @@ module.exports = ( app ) ->
 
     .post '/activity/:activityId/stop', [ app.sessionAuth ], ( req, res, next ) ->
       activityId = req.param( 'activityId' )
-      url = "#{app.options.host}/users/#{res.data.user.id}/
-             activities/#{activity.id}"
+      url = "#{app.options.host}/users/#{res.data.user.id}/activities/#{activityId}"
 
       data =
         data:
           end: moment().format()
         headers: req.headers
-
+      console.log(url)
       rest.put( url, data )
         .on 'complete', ( jres ) ->
           res.redirect( 'back' )
 
     .post '/activity/:activityId/delete', [ app.sessionAuth ], ( req, res, next ) ->
       activityId = req.param( 'activityId' )
-      url = "#{app.options.host}/users/#{res.data.user.id}/
-             activities/#{activity.id}"
+      url = "#{app.options.host}/users/#{res.data.user.id}/activities/#{activityId}"
 
       data =
         headers: req.headers
