@@ -4,13 +4,11 @@ decode = require( '../utils/url.coffee' ).decode
 encode = require( '../utils/url.coffee' ).encode
 express = require( 'express' )
 moment = require( 'moment' )
-Promise = require( 'bluebird' )
-rest = require( 'restler' )
 Restclient = require( '../utils/restclient.coffee' )
 
 module.exports = ( app ) ->
-  sandglass = new Restclient( app )
   DATE_FORMAT = app.options.dateFormat
+  sandglass = new Restclient( app )
 
   router = express.Router()
     .get '/', [ app.sessionAuth ], ( req, res, next ) ->

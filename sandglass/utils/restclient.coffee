@@ -18,7 +18,7 @@ rest_init = ( app ) ->
 rest_defaults = {}
 
 rest_urls =
-  _user_resource: ( resource, req, res, get ) ->
+  _user_resource_get: ( resource, req, res, get ) ->
     userId = res.getUser().id
 
     new Promise ( resolve, reject ) =>
@@ -29,12 +29,12 @@ rest_urls =
           reject( createFail( result_data, result_response ) )
 
   user_activities_get: ( req, res, get ) ->
-    this._user_resource( 'activities', req, res, get )
+    this._user_resource_get( 'activities', req, res, get )
 
   user_tasks_get: ( req, res, get ) ->
-    this._user_resource( 'tasks', req, res, get )
+    this._user_resource_get( 'tasks', req, res, get )
 
   user_projects_get: ( req, res, get ) ->
-    this._user_resource( 'projects', req, res, get )
+    this._user_resource_get( 'projects', req, res, get )
 
 module.exports = rest.service( rest_init, rest_defaults, rest_urls )
