@@ -97,7 +97,7 @@ module.exports = ( sequelize, DataTypes ) ->
 
           @.findAll( find )
             .then ( activities ) ->
-              if not activities and not activities.length
+              if id? and not activities.length
                 reject( errors.NotFound( 'Activity' ) )
 
               resolve( activities: activities )

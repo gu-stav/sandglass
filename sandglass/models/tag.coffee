@@ -1,3 +1,4 @@
+errors = require( '../errors/index.coffee' )
 Promise = require( 'bluebird' )
 
 module.exports = ( sequelize, DataTypes ) ->
@@ -52,17 +53,20 @@ module.exports = ( sequelize, DataTypes ) ->
 
       get: ( req, user, id ) ->
         return new Promise ( resolve, reject ) =>
-          where =
+          find =
             where: {}
 
           if user?
-            where.where.UserId = user.id
+            find.where.UserId = user.id
 
           if id?
-            where.where.id = id
+            find.where.id = id
 
           @.findAll( where )
             .then ( tags ) ->
+              if id? and not tags.length
+                return reject( errors.NotFound( 'Tag' ) )
+
               resolve( tags: tags )
     }
 

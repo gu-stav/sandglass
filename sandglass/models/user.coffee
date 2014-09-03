@@ -165,17 +165,14 @@ module.exports = ( sequelize, DataTypes ) ->
           @.find( search )
             .then ( user ) =>
               if not user
-                return reject( new Error( 'Invalid login credentials' ) )
-
-              if not password
-                return reject( new Error( 'No password provided' ) )
+                return reject( errors.BadRequest( 'Invalid login credentials' ) )
 
               bcrypt.compare password, user.password, ( err, res ) =>
                 if err
                   return reject( err )
 
                 if not res
-                  return reject( new Error( 'Invalid password' ) )
+                  return reject( errors.BadRequest( 'Invalid login credentials' ) )
 
                 # create new session
                 session = crypto.createHash( 'sha1' )
@@ -187,7 +184,6 @@ module.exports = ( sequelize, DataTypes ) ->
 
                 user.updateAttributes( update )
                   .then ( user ) =>
-
                     # set response cookie
                     cookieName = @.__app.options.cookie.name
                     cookieOptions = @.__app.options.cookie.options

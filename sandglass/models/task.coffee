@@ -1,3 +1,4 @@
+errors = require( '../errors/index.coffee' )
 Promise = require( 'bluebird' )
 
 module.exports = ( sequelize, DataTypes ) ->
@@ -72,6 +73,9 @@ module.exports = ( sequelize, DataTypes ) ->
 
           @.findAll( find )
             .then ( tasks ) ->
+              if id? and not tasks.length
+                return reject( errors.NotFound( 'Task' ) )
+
               resolve( tasks: tasks )
             .catch( reject )
     }
