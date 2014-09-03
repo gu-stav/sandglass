@@ -1,5 +1,5 @@
 NotFound = ( resourceName, field ) ->
-  @.message = 'Resource #{resourceName} not found'
+  @.message = "Resource #{resourceName} not found"
 
   if field
     @.field = field

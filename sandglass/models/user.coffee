@@ -58,20 +58,20 @@ module.exports = ( sequelize, DataTypes ) ->
           this.find( find )
             .then ( user ) ->
               if not user
-                return reject( new Error( 'User not found' ) )
+                return reject( errors.NotFound( 'User' ) )
 
               if not options.full
                 user = user.render()
-                return resolve( users: [ user ] )
+                resolve( users: [ user ] )
               else
-                return resolve( user )
+                resolve( user )
 
       auth: ( req ) ->
         return new Promise ( resolve, reject ) =>
           session = req.getSessionCookie()
 
           if not session
-            reject( errors.NoPermission( 'No session provided' ) )
+            reject( errors.NoPermission( 'Session Cookie missing' ) )
 
           @.findBySession( session, { full: true } )
             .then( resolve, reject )
@@ -81,7 +81,7 @@ module.exports = ( sequelize, DataTypes ) ->
 
         new Promise ( resolve, reject ) =>
           if not data._rawPassword
-            return reject( new Error( '_rawPassword was not provided.' ) )
+            return reject( errors.BadRequest( '_rawPassword not submitted' ) )
 
           bcrypt.genSalt 12, ( err, salt ) =>
             if err
@@ -94,17 +94,14 @@ module.exports = ( sequelize, DataTypes ) ->
               data.password = hash
 
               @.create( data )
+                .catch( reject )
                 .then ( user ) =>
-                  if not user
-                    return reject( new Error( 'No user created' ) )
-
-                  new Promise ( resolve, reject ) =>
-                    @.__models.Role.getDefault()
-                      .then ( role ) =>
-                        user.setRole( role )
-                          .then( resolve, reject )
+                  @.__models.Role.getDefault()
+                    .then ( role ) ->
+                      user.setRole( role )
                 .then ( user ) ->
                   resolve( users: [ user.render() ] )
+                .catch( reject )
 
       get: ( req, id, options ) ->
         includes = [ @.__models.Role ]
@@ -126,9 +123,11 @@ module.exports = ( sequelize, DataTypes ) ->
 
           @.findAll( find )
             .then ( users ) ->
-              if not users
-                return resolve( users: [] )
+              # a single user was requested, but not found
+              if id? and not users.length
+                return reject( errors.NotFound( 'User' ) )
 
+              # return a single raw DAO
               if users.length is 1 and ( options? and options.single? )
                 return resolve( users[ 0 ] )
 
@@ -141,14 +140,10 @@ module.exports = ( sequelize, DataTypes ) ->
           response.clearCookie( @.__app.options.cookie.name )
 
           @.findBySession( session )
-            .then ( user ) =>
-              update =
-                session: null
-
-              user.updateAttributes( update )
-                .then ( user ) =>
-                  resolve( users: [ user ] )
-                .catch( reject )
+            .then ( user ) ->
+              user.updateAttributes( session: null )
+            .then ( user ) ->
+              resolve( users: [ user ] )
             .catch( reject )
 
       login: ( req, response ) ->

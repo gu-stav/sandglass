@@ -99,11 +99,8 @@ module.exports = ( app ) ->
 
             rdata.projects
 
-      Promise.all([
-        getActivities(),
-        getTasks(),
-        getProjects()
-      ])
+      # join seems to be more performant, than promise.all
+      Promise.join( getActivities(), getTasks(), getProjects() )
         .spread ( activities, tasks, projects ) ->
           data =
             activities: activities

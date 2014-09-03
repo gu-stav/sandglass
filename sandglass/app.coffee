@@ -88,19 +88,41 @@ class Sandglass
       res.data = {}
       # hold collected errors
       res.errors = []
+
+      finish_response = () ->
+        if res.errors and res.errors.length > 0
+          res.data.errors = []
+
+          _.each res.errors, ( err ) ->
+            if err.field?
+              errData =
+                field: err.field
+
+            if err.message?
+              if _.isObject( errData )
+                errData.message = err.message
+              else
+                errData = err.message
+
+            res.data.errors.push( errData )
+
+          res.status( 400 )
+
+        res.json( res.data ).end()
+
       # success handler
       res.success = ( data ) ->
         if data
           _.assign( res.data, data )
 
-        next()
+        finish_response()
 
       # error handler
       res.error = ( err ) ->
         if err
-          res.errors.push( err );
+          res.errors.push( err )
 
-        next()
+        finish_response()
 
       req.getSessionCookie = () ->
         req.cookies[ app.options.cookie.name ] or undefined
@@ -117,28 +139,6 @@ class Sandglass
           res.error( err )
 
     @mount( app, require( './routes/api/index.coffee' )( app ) )
-
-    # execute response
-    app.all '*', ( req, res, next ) ->
-      if res.errors and res.errors.length > 0
-        res.data.errors = []
-
-        _.each res.errors, ( err ) ->
-          if err.field?
-            errData =
-              field: err.field
-
-          if err.message?
-            if _.isObject( errData )
-              errData.message = err.message
-            else
-              errData = err.message
-
-          res.data.errors.push( errData )
-
-        res.status( 400 )
-
-      res.json( res.data ).end()
 
     return app
 
