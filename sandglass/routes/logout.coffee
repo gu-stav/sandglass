@@ -6,7 +6,7 @@ module.exports = ( app ) ->
 
   router
     .get '/logout', ( req, res, next ) ->
-      url = app.options.host + '/logout'
+      url = "#{app.options.host}/logout"
 
       data =
         headers: req.headers

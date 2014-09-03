@@ -31,7 +31,7 @@ module.exports = ( app ) ->
 
       getActivities = () ->
         new Promise ( resolve ,reject ) ->
-          rest.get( app.options.host + '/users/' + userId + '/activities' + get_data, req_data )
+          rest.get( "#{app.options.host}/users/#{userId}/activities" + get_data, req_data )
           .on 'complete', ( jres, err ) ->
             week_ahead = to.clone().add( 1, 'weeks' )
             week_ahead_start = to.clone()
@@ -87,7 +87,7 @@ module.exports = ( app ) ->
 
       getTasks = ( data ) ->
         new Promise ( resolve, reject ) ->
-          rest.get( app.options.host + '/users/' + userId + '/tasks', req_data )
+          rest.get( "#{app.options.host}/users/#{userId}/tasks", req_data )
             .on 'complete', ( jres ) ->
               if jres and jres.tasks
                 tasks = jres.tasks
@@ -99,7 +99,7 @@ module.exports = ( app ) ->
 
       getProjects = ( data ) ->
         new Promise ( resolve, reject ) ->
-          rest.get( app.options.host + '/users/' + userId + '/projects', req_data )
+          rest.get( "#{app.options.host}/users/#{userId}/projects", req_data )
             .on 'complete', ( jres ) ->
               if jres and jres.projects
                 projects = jres.projects

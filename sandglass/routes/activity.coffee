@@ -7,7 +7,7 @@ module.exports = ( app ) ->
   router = express.Router()
     .post '/activity', [ app.sessionAuth ], ( req, res, next ) ->
       createActivity = () ->
-        url = app.options.host + '/users/' + res.data.user.id + '/activities'
+        url =  "#{app.options.host}/users/#{res.data.user.id}/activities"
 
         new Promise ( resolve, reject ) ->
           rest.post( url, { data: req.body, headers: req.headers } )
@@ -15,7 +15,8 @@ module.exports = ( app ) ->
               resolve( result.activities[ 0 ] )
 
       createTask = ( activity ) ->
-        url = app.options.host + '/users/' + res.data.user.id + '/activities/' + activity.id + '/tasks'
+        url = "#{app.options.host}/users/#{res.data.user.id}/
+               activities/#{activity.id}/tasks"
 
         data =
           title: req.body.task
@@ -26,7 +27,8 @@ module.exports = ( app ) ->
               resolve( result.tasks )
 
       createProject = ( activity ) ->
-        url = app.options.host + '/users/' + res.data.user.id + '/activities/' + activity.id + '/projects'
+        url = "#{app.options.host}/users/#{res.data.user.id}/
+               activities/#{activity.id}/projects"
 
         data =
           title: req.body.project
@@ -52,7 +54,8 @@ module.exports = ( app ) ->
 
     .post '/activity/:activityId/stop', [ app.sessionAuth ], ( req, res, next ) ->
       activityId = req.param( 'activityId' )
-      url = app.options.host + '/users/' + res.data.user.id + '/activities/' + activityId
+      url = "#{app.options.host}/users/#{res.data.user.id}/
+             activities/#{activity.id}"
 
       data =
         data:
@@ -65,7 +68,8 @@ module.exports = ( app ) ->
 
     .post '/activity/:activityId/delete', [ app.sessionAuth ], ( req, res, next ) ->
       activityId = req.param( 'activityId' )
-      url = app.options.host + '/users/' + res.data.user.id + '/activities/' + activityId
+      url = "#{app.options.host}/users/#{res.data.user.id}/
+             activities/#{activity.id}"
 
       data =
         headers: req.headers
