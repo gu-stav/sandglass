@@ -58,7 +58,7 @@ module.exports = ( app ) ->
         data:
           end: moment().format()
         headers: req.headers
-      console.log(url)
+
       rest.put( url, data )
         .on 'complete', ( jres ) ->
           res.redirect( 'back' )
