@@ -48,6 +48,9 @@ class Sandglass
       res.data = {}
       res.errors = []
 
+      res.getUser = () ->
+        res.data.user
+
       res.error = ( err ) ->
         if err
           res.errors.push( err )

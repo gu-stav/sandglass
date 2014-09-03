@@ -3,6 +3,7 @@ moment = require( 'moment' )
 Promise = require( 'bluebird' )
 rest = require( 'restler' )
 
+
 module.exports = ( app ) ->
   router = express.Router()
     .post '/activity', [ app.sessionAuth ], ( req, res, next ) ->

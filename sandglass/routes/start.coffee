@@ -6,8 +6,10 @@ express = require( 'express' )
 moment = require( 'moment' )
 Promise = require( 'bluebird' )
 rest = require( 'restler' )
+Restclient = require( '../utils/restclient.coffee' )
 
 module.exports = ( app ) ->
+  sandglass = new Restclient( app )
   DATE_FORMAT = app.options.dateFormat
 
   router = express.Router()
@@ -30,9 +32,8 @@ module.exports = ( app ) ->
                  '&to=' + encode( date.format( to ) )
 
       getActivities = () ->
-        new Promise ( resolve ,reject ) ->
-          rest.get( "#{app.options.host}/users/#{userId}/activities" + get_data, req_data )
-          .on 'complete', ( jres, err ) ->
+        sandglass.user_activities_get( req, res, get_data )
+          .then ( data ) ->
             week_ahead = to.clone().add( 1, 'weeks' )
             week_ahead_start = to.clone()
 
@@ -54,11 +55,11 @@ module.exports = ( app ) ->
               showing_from: date.format( from, 'Date' )
               showing_to:   date.format( to, 'Date' )
 
-            if jres.activities? and jres.activities.length
-              activities = _.groupBy jres.activities, ( activity ) ->
+            if data.activities? and data.activities.length
+              data.activities = _.groupBy data.activities, ( activity ) ->
                 return date.format( moment( activity.start ), 'Date' )
 
-              for groupName, groupActivities of activities
+              for groupName, groupActivities of data.activities
                 for activity in groupActivities
                   if activity.start
                     activity._start = activity.start
@@ -78,36 +79,25 @@ module.exports = ( app ) ->
                   activity.duration = date.duration( activity_start,
                                                      activity_duration_end )
             else
-              activities= []
+              data.activities= []
 
-            data = activities: activities
-
-            data = _.assign( data, template_data )
-            resolve( data )
+            _.assign( data, template_data )
 
       getTasks = ( data ) ->
-        new Promise ( resolve, reject ) ->
-          rest.get( "#{app.options.host}/users/#{userId}/tasks", req_data )
-            .on 'complete', ( jres ) ->
-              if jres and jres.tasks
-                tasks = jres.tasks
-              else
-                tasks = []
+        sandglass.user_tasks_get( req, res, get_data )
+          .then ( rdata ) ->
+            if not rdata or not rdata.tasks
+              rdata.tasks = []
 
-              _.assign( data, tasks: tasks )
-              resolve( data )
+            _.assign( data, rdata )
 
       getProjects = ( data ) ->
-        new Promise ( resolve, reject ) ->
-          rest.get( "#{app.options.host}/users/#{userId}/projects", req_data )
-            .on 'complete', ( jres ) ->
-              if jres and jres.projects
-                projects = jres.projects
-              else
-                projects = []
+        sandglass.user_projects_get( req, res, get_data )
+          .then ( rdata ) ->
+            if not rdata or not rdata.projects
+              rdata.projects = []
 
-              _.assign( data, projects: projects )
-              resolve( data )
+            _.assign( data, rdata )
 
       getActivities()
         .then( getTasks )
