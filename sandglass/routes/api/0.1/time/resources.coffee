@@ -1,15 +1,24 @@
-_ = require( 'lodash' )
 errors = require( '../../../../errors/index.coffee' )
 express = require( 'express' )
+inflection = require( 'inflection' )
 Promise = require( 'bluebird' )
 url = require( 'url' );
 
 module.exports = ( app ) ->
   express.Router( app.options.base )
+
+    # auth middleware
     .use ( req, res, next ) ->
       action = req.param('action')
 
-      if action is 'login' or action is 'signup' or action is 'session'
+      session_ignore = [
+        'login',
+        'signup',
+        'session'
+      ]
+
+      # these actions don't require a logged in user - all the others do
+      if session_ignore.indexOf( action ) isnt -1
         return next()
 
       app.models.User.session( req )
@@ -22,29 +31,25 @@ module.exports = ( app ) ->
           next()
 
     .all '*', ( req, res ) ->
-      parts = url.parse( req.url ).pathname.split( '/' )
+      createModelMapping = ( models ) ->
+        result = {}
 
-      # supported models
-      mapping =
-        activities: 'Activity'
-        users: 'User'
-        tasks: 'Task'
-        projects: 'Project'
+        for index, model of models
+          model_name = model.name
+          model_index = inflection.pluralize( model_name )
+          model_index = model_index.toLowerCase()
 
-      promises = []
+          result[ model_index ] = model_name
 
-      # request method
-      method = req.method.toLowerCase()
+        return result
 
-      # action: overwrites method
-      action = req.param('action')
+      createPromiseChain = ( url_parts ) ->
+        result = []
 
-      if action
-        method = action
-
-      for part, index in parts
-        if mapping[ part ]
+        for part, index in url_parts
           model_name = mapping[ part ]
+
+        if model_name
           next_part = parts[ index + 1 ]
           promise_data = [ model_name ]
 
@@ -53,12 +58,15 @@ module.exports = ( app ) ->
             if not mapping[ next_part ]
               promise_data.push( next_part )
 
-          promises.push( promise_data )
+          result.push( promise_data )
 
-      solvePromises = ( data, promiseData ) ->
+        return result
+
+      resolvePromiseChain = ( data, promiseData ) ->
         model_name = promiseData[ 0 ]
         id = promiseData[ 1 ]
 
+        # first run
         if not data
           data = {}
 
@@ -76,15 +84,30 @@ module.exports = ( app ) ->
           err_msg = "#{method} not implemented for #{ model_name }"
           return Promise.rejct( errors.BadRequest( err_msg ) )
 
+        # execute given method on the model
         app.models[ model_name ][ method ]( req, req.context, id, res )
-          .catch ( err ) ->
-            Promise.reject( err )
+          .catch( Promise.reject )
           .then ( instance ) ->
             if instance
-              req.context[ model_name.toLowerCase() ] = instance
-              data[ model_name.toLowerCase() ] = instance
+              model_name = model_name.toLowerCase()
+              req.context[ model_name ] = data[ model_name ] = instance
+
+      # split up the url - forget about get parameters
+      parts = url.parse( req.url ).pathname.split( '/' )
+
+      # action: overwrites method
+      action = req.param('action')
+
+      # request method
+      method = action or req.method.toLowerCase()
+
+      # supported models
+      mapping = createModelMapping( app.models )
+
+      # create [ ModelName: #ID (opt.) ] arrray
+      promises = createPromiseChain( parts )
 
       Promise
-        .reduce( promises, solvePromises, 0 )
+        .reduce( promises, resolvePromiseChain, 0 )
         .catch( res.error )
         .then( res.finish )
