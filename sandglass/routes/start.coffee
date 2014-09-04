@@ -55,6 +55,8 @@ module.exports = ( app ) ->
       getActivities = () ->
         sandglass.user_activities_get( req, res, get_data )
           .then ( data ) ->
+            console.log( 'got activities', data.activities )
+            
             if data.activities? and data.activities.length
               data.activities = _.groupBy data.activities, ( activity ) ->
                 return date.format( moment( activity.start ), 'Date' )

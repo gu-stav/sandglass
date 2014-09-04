@@ -1,5 +1,6 @@
-errors = require( '../errors/index.coffee' )
+crud = require( '../utils/crud.coffee' )
 date = require( '../utils/date.coffee' )
+errors = require( '../errors/index.coffee' )
 moment = require( 'moment' )
 Promise = require( 'bluebird' )
 
@@ -63,44 +64,38 @@ module.exports = ( sequelize, DataTypes ) ->
                      @.__models.Project,
                      @.__models.Tag ]
 
-        new Promise ( resolve, reject ) =>
-          from = req.param( 'from' )
-          to = req.param( 'to' )
-          find =
-            where: {}
-            include: includes
-            order: [
-              [ 'start', 'ASC' ]
-            ]
+        from = req.param( 'from' )
+        to = req.param( 'to' )
+        find =
+          where: {}
+          include: includes
+          order: [
+            [ 'start', 'ASC' ]
+          ]
 
-          if id?
-            find.where.id = id
+        if id?
+          find.where.id = id
 
-          if context? and context.user?
-            context_user = context.user
-            find.where.UserId = context_user.id
+        if context? and context.user?
+          context_user = context.user
+          find.where.UserId = context_user.id
 
-          if from
-            from = date.fromString( from ).toDate()
+        if from
+          from = date.fromString( from ).toDate()
 
-          if to
-            to = date.fromString( to ).toDate()
+        if to
+          to = date.fromString( to ).toDate()
 
-          if from? and to?
-            find.where.start = between: [ from, to ]
-          else
-            if from?
-              find.where.start = gt: from
+        if from? and to?
+          find.where.start = between: [ from, to ]
+        else
+          if from?
+            find.where.start = gt: from
 
-            if to?
-              find.where.start = lt: to
+          if to?
+            find.where.start = lt: to
 
-          @.findAll( find )
-            .then ( activities ) ->
-              if id? and not activities.length
-                reject( errors.NotFound( 'Activity' ) )
-
-              resolve( activities: activities )
+        crud.READ.call( @, find, id )
 
       update: ( req, context, id ) ->
         new Promise ( resolve, reject ) =>

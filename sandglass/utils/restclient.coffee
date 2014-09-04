@@ -18,23 +18,54 @@ rest_init = ( app ) ->
 rest_defaults = {}
 
 rest_urls =
-  _user_resource_get: ( resource, req, res, get ) ->
-    userId = res.getUser().id
+  _user_resource_get: ( resource, req, res, get, method ) ->
+    user = res.getUser()
+
+    if not method?
+      method = 'get'
+
+    if user
+      userId = user.id
+    else
+      userId = ''
+
+    if not resource
+      resource = ''
 
     new Promise ( resolve, reject ) =>
-      this.get( "#{this.baseUrl}/users/#{userId}/#{resource}#{get}", createData( req ) )
-        .on 'complete', ( result_data ) ->
-          resolve( createSuccess( result_data ) )
-        .on 'fail', ( result_data, result_response ) ->
-          reject( createFail( result_data, result_response ) )
+      url = "#{this.baseUrl}/users/#{userId}"
+
+      if resource
+        url += "/#{resource}"
+
+      if get
+        url += "#{get}"
+
+      console.log( method, 'request to', url )
+
+      @[method]( url, createData( req ) )
+        .on 'success', ( result_data, raw_response ) ->
+          res.set( raw_response.headers )
+          res.set({
+            'Content-Type': 'text/html; charset=utf-8'
+            })
+          resolve( createSuccess( result_data ), raw_response )
+        .on 'fail', ( result_data, raw_response ) ->
+          reject( createFail( result_data, raw_response ) )
 
   user_activities_get: ( req, res, get ) ->
-    this._user_resource_get( 'activities', req, res, get )
+    @._user_resource_get( 'activities', req, res, get )
 
   user_tasks_get: ( req, res, get ) ->
-    this._user_resource_get( 'tasks', req, res, get )
+    @._user_resource_get( 'tasks', req, res, get )
 
   user_projects_get: ( req, res, get ) ->
-    this._user_resource_get( 'projects', req, res, get )
+    @._user_resource_get( 'projects', req, res, get )
+
+  user_login_post: ( req, res, get ) ->
+    @._user_resource_get( null, req, res, get, 'post' )
+
+  auth_get: ( req, res, get ) ->
+    @._user_resource_get( null, req, res, get )
 
 module.exports = rest.service( rest_init, rest_defaults, rest_urls )

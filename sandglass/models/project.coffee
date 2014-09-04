@@ -1,3 +1,4 @@
+crud = require( '../utils/crud.coffee' )
 errors = require( '../errors/index.coffee' )
 Promise = require( 'bluebird' )
 
@@ -58,25 +59,19 @@ module.exports = ( sequelize, DataTypes ) ->
               resolve( projects: [ project ] )
 
       get: ( req, context, id ) ->
-        new Promise ( resolve, reject ) =>
-          find =
-            where: {}
+        find =
+          where: {}
 
-          if context? and context.user?
-            find.where.UserId = context.user.id
+        if context? and context.user?
+          find.where.UserId = context.user.id
 
-          if context? and context.activity?
-            find.where.ActivityId = context.activity.id
+        if context? and context.activity?
+          find.where.ActivityId = context.activity.id
 
-          if id?
-            find.where.id = id
+        if id?
+          find.where.id = id
 
-          @.findAll( find )
-            .then ( projects ) ->
-              if id? and not projects.length
-                return reject( errors.NotFound( 'Project') )
-
-              resolve( projects: projects )
+        crud.READ.call( @, find, id )
     }
 
   )

@@ -3,7 +3,7 @@ bodyParser = require( 'body-parser')
 cookieParser = require('cookie-parser')
 express = require( 'express' )
 Promise = require( 'bluebird' )
-rest = require( 'restler' )
+Restclient = require( './utils/restclient.coffee' )
 Sequelize = require( 'sequelize' )
 
 class Sandglass
@@ -63,15 +63,15 @@ class Sandglass
 
     # auth middleware
     app.sessionAuth = ( req, res, next ) =>
+      sandglass = new Restclient( app )
       session = req.cookies[ app.options_api.cookie.name ] or undefined
 
-      rest.get( app.options.host + '/sessions/' + session )
-        .on 'complete', ( jres ) ->
-          if jres.users
-            res.data.user = jres.users[ 0 ]
-            next()
-          else
-            res.redirect( '/signup' )
+      sandglass.auth_get( req, res, '?action=session' )
+        .catch () ->
+          res.redirect( '/signup' )
+        .then ( users ) ->
+          res.data.user = users.users
+          next()
 
     @mount( app, require( './routes/index.coffee' )( app ) )
     return app
@@ -94,54 +94,80 @@ class Sandglass
       # hold collected errors
       res.errors = []
 
-      finish_response = () ->
-        if res.errors and res.errors.length > 0
-          res.data.errors = []
-
-          _.each res.errors, ( err ) ->
-            if err.field?
-              errData =
-                field: err.field
-
-            if err.message?
-              if _.isObject( errData )
-                errData.message = err.message
-              else
-                errData = err.message
-
-            res.data.errors.push( errData )
-
-          res.status( 400 )
-
-        res.json( res.data ).end()
+      req.context = {}
 
       # success handler
-      res.success = ( data ) ->
-        if data
-          _.assign( res.data, data )
+      res.finish = ( data ) ->
+        response = {}
 
-        finish_response()
+        processDataEntry = ( entry ) ->
+          res_data = {}
+
+          if entry.Model?
+            if entry.render?
+              processed = entry.render()
+            else
+              processed = entry.toJSON()
+
+        if res.errors.length
+          response.errors = []
+
+          for error in res.errors
+            if error.field
+              err_data =
+                field: error.field
+                message: error.message
+
+              response.errors.push( err_data )
+            else
+              response.errors.push( error.message )
+
+        if _.isArray( data )
+          for data_val in data
+            if data_val.Model
+              result = processDataEntry( data_val )
+              data_val_index = data_val.__options.name.plural.toLowerCase()
+
+              if not response[ data_val_index ]
+                response[ data_val_index ] = [ result ]
+              else
+                response[ data_val_index ].push( result )
+
+        else
+          if data
+            response[ data.__options.name.plural.toLowerCase() ] = processDataEntry( data )
+
+        if res.data.cookie
+          res.cookie( res.data.cookie[0], res.data.cookie[1], res.data.cookie[2] )
+
+        res.json( response ).end()
 
       # error handler
       res.error = ( err ) ->
+        response = {}
+
         if err
           res.errors.push( err )
 
-        finish_response()
+        if res.errors.length
+          response.errors = []
+
+          for error in res.errors
+            if error.field
+              err_data =
+                field: error.field
+                message: error.message
+
+              response.errors.push( err_data )
+            else
+              response.errors.push( error.message )
+
+        res.json( response ).status( err.code ).end()
 
       req.getSessionCookie = () ->
         req.cookies[ app.options.cookie.name ] or undefined
 
       next()
-
-    # always preload user, when user-id is involved
-    app.sessionAuth = ( req, res, next ) ->
-      app.models.User.auth( req )
-        .then ( user ) ->
-          req.user = user
-          next()
-        .catch ( err ) ->
-          res.error( err )
 
     @mount( app, require( './routes/api/index.coffee' )( app ) )
 

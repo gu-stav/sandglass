@@ -1,13 +1,14 @@
 express = require( 'express' )
-rest = require( 'restler' )
+Restclient = require( '../utils/restclient.coffee' )
 
 module.exports = ( app ) ->
+  sandglass = new Restclient( app )
+
   router = express.Router()
     .post '/login', ( req, res, next ) ->
-      rest.post( "#{app.options.host}/login", data: req.body )
-        .on 'success', ( jres, rres ) ->
-          res.set( rres.headers )
+      sandglass.user_login_post( req, res, '?action=login' )
+        .spread ( user, raw_response ) ->
           res.redirect( '/' )
-        .on 'fail', ( jres ) ->
-          jres.req = req.body
-          res.render( 'signup', jres )
+        .catch ( raw_response ) ->
+          raw_response.req = req.body
+          res.render( 'signup', raw_response )

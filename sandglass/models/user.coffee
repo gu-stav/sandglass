@@ -1,5 +1,6 @@
 _ = require( 'lodash' )
 bcrypt = require( 'bcrypt' )
+crud = require( '../utils/crud.coffee' )
 crypto = require( 'crypto' )
 errors = require( '../errors/index.coffee' )
 Promise = require( 'bluebird' )
@@ -47,34 +48,17 @@ module.exports = ( sequelize, DataTypes ) ->
         @.hasOne( models.Task )
         @.hasOne( models.Tag )
 
-      findBySession: ( session, options ) ->
-        options = _.defaults( options || {}, full: false )
+      session: ( req, context, id, res ) ->
+        session = req.getSessionCookie()
 
-        new Promise ( resolve, reject ) =>
-          find =
+        if not session
+          return Promise.reject( errors.BadRequest( 'No session cookie submitted' ) )
+
+        find =
             where:
               session: session
 
-          this.find( find )
-            .then ( user ) ->
-              if not user
-                return reject( errors.NotFound( 'User' ) )
-
-              if not options.full
-                user = user.render()
-                resolve( users: [ user ] )
-              else
-                resolve( user )
-
-      auth: ( req ) ->
-        return new Promise ( resolve, reject ) =>
-          session = req.getSessionCookie()
-
-          if not session
-            reject( errors.NoPermission( 'Session Cookie missing' ) )
-
-          @.findBySession( session, { full: true } )
-            .then( resolve, reject )
+        crud.READ.call( @, find, true )
 
       post: ( req ) ->
         data = req.body
@@ -103,35 +87,17 @@ module.exports = ( sequelize, DataTypes ) ->
                   resolve( users: [ user.render() ] )
                 .catch( reject )
 
-      get: ( req, id, options ) ->
+      get: ( req, context, id ) ->
         includes = [ @.__models.Role ]
 
-        new Promise ( resolve, reject ) =>
-          # fast path - user was already preloaded
-          if req.user and req.user.id is id
-            if options? and options.single?
-              return resolve( req.user )
+        find =
+          where: {}
+          include: includes
 
-            resolve( users: req.user.render() )
+        if id?
+          find.where.id = id
 
-          find =
-            where: {}
-            include: includes
-
-          if id?
-            find.where.id = id
-
-          @.findAll( find )
-            .then ( users ) ->
-              # a single user was requested, but not found
-              if id? and not users.length
-                return reject( errors.NotFound( 'User' ) )
-
-              # return a single raw DAO
-              if users.length is 1 and ( options? and options.single? )
-                return resolve( users[ 0 ] )
-
-              resolve( users: ( user.render() for user in users ) )
+        crud.READ.call( @, find, id )
 
       logout: ( req, response ) ->
         new Promise ( resolve, reject ) =>
@@ -146,7 +112,7 @@ module.exports = ( sequelize, DataTypes ) ->
               resolve( users: [ user ] )
             .catch( reject )
 
-      login: ( req, response ) ->
+      login: ( req, context, id, response ) ->
         new Promise ( resolve, reject ) =>
           data = req.body
           password = data.password
@@ -158,15 +124,13 @@ module.exports = ( sequelize, DataTypes ) ->
           if not password
             return reject( errors.BadRequest( 'Invalid password', 'password' ) )
 
-          search =
+          find =
             where:
               email: email
 
-          @.find( search )
+          crud.READ.call( @, find, id )
+            .catch( reject )
             .then ( user ) =>
-              if not user
-                return reject( errors.BadRequest( 'Invalid login credentials' ) )
-
               bcrypt.compare password, user.password, ( err, res ) =>
                 if err
                   return reject( err )
@@ -188,9 +152,8 @@ module.exports = ( sequelize, DataTypes ) ->
                     cookieName = @.__app.options.cookie.name
                     cookieOptions = @.__app.options.cookie.options
                     session = user.session
-                    response.cookie( cookieName, session, cookieOptions )
-
-                    resolve( users: [ user.render() ] )
+                    response.data.cookie = [ cookieName, session, cookieOptions ]
+                    resolve()
 
     instanceMethods:
       render: ( password = false, salt = false ) ->
