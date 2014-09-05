@@ -27,6 +27,22 @@ READ = ( find, id ) ->
           resolve( instances )
       .catch( reject )
 
+UPDATE = ( find, data ) ->
+  READ( find )
+    .catch( Promise.reject )
+    .then ( instance ) =>
+      instance.updateAttributes( data )
+    .catch( Promise.reject )
+
+DELETE = ( find, id ) ->
+  READ( find, id )
+    .catch( Promise.reject )
+    .then ( instance ) =>
+      instance.destroy()
+    .catch( Promise.reject )
+
 module.exports =
   CREATE: CREATE
   READ: READ
+  UPDATE: UPDATE
+  DELETE: DELETE

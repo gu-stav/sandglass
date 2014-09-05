@@ -93,43 +93,25 @@ module.exports = ( sequelize, DataTypes ) ->
         crud.READ.call( @, find, id )
 
       update: ( req, context, id ) ->
-        new Promise ( resolve, reject ) =>
-          data = req.body
-          find =
-            where:
-              id: id
+        data = req.body
+        find =
+          where:
+            id: id
 
-          if context? and context.user?
-            find.where.UserId = context.user.id
+        if context? and context.user?
+          find.where.UserId = context.user.id
 
-          @.find( find )
-            .then ( activity ) ->
-              if not activity
-                return reject( new errors.NotFound( 'Activity' ) )
-
-              activity.updateAttributes( data )
-                .then ( activity ) ->
-                  resolve( activities: [ activity ] )
-                .catch( reject )
+        crud.UPDATE.call( @, find, data )
 
       delete: ( req, context, id ) ->
-        new Promise ( resolve, reject ) =>
-          find =
-            where:
-              id: id
+        find =
+          where:
+            id: id
 
-          if context? and context.user?
-            find.where.UserId = context.user.id
+        if context? and context.user?
+          find.where.UserId = context.user.id
 
-          @.find( find )
-            .then ( activity ) ->
-              if not activity
-                return reject( new errors.NotFound( 'Activity not found' ) )
-
-              activity.destroy()
-                .then ( activity ) ->
-                  resolve( activities: [ activity ] )
-                .catch( reject )
+        crud.DELETE.call( @, find, id )
     }
 
   )
