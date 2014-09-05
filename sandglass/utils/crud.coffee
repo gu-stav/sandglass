@@ -4,8 +4,8 @@ Promise = require( 'bluebird' )
 create = ( data ) ->
   new Promise ( resolve, reject ) =>
     if data and data.defaults and data.where
-      @.findOrCreate( find )
-        .spread( instance, created ) ->
+      @.findOrCreate( where: data.where )
+        .spread ( instance, created ) ->
           resolve( instance, true )
         .catch( reject )
     else

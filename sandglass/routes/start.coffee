@@ -53,57 +53,48 @@ module.exports = ( app ) ->
       getActivities = () ->
         sandglass.user_activities_get( req, res, get_data )
           .then ( data ) ->
-            if data.activities? and data.activities.length
-              data.activities = _.groupBy data.activities, ( activity ) ->
-                return date.format( moment( activity.start ), 'Date' )
+            if not data.activities? or not data.activities.length
+              return data.activities= []
 
-              for groupName, groupActivities of data.activities
-                for activity in groupActivities
-                  if activity.start
-                    activity._start = activity.start
-                    activity_start = moment( activity.start )
-                    activity.start = date.format( activity_start, 'Time' )
+            data.activities = _.groupBy data.activities, ( activity ) ->
+              return date.format( moment( activity.start ), 'Date' )
 
-                  if activity.end
-                    activity._end = activity.end
-                    activity_end = moment( activity.end )
-                    activity.end = date.format( activity_end, 'Time' )
+            for groupName, groupActivities of data.activities
+              for activity in groupActivities
+                if activity.start
+                  activity._start = activity.start
+                  activity_start = moment( activity.start )
+                  activity.start = date.format( activity_start, 'Time' )
 
-                  if activity.end
-                    activity_duration_end = activity_end
-                  else
-                    activity_duration_end = moment()
+                if activity.end
+                  activity._end = activity.end
+                  activity_end = moment( activity.end )
+                  activity.end = date.format( activity_end, 'Time' )
 
-                  activity.duration = date.duration( activity_start,
-                                                     activity_duration_end )
-            else
-              data.activities= []
+                if activity.end
+                  activity_duration_end = activity_end
+                else
+                  activity_duration_end = moment()
 
-            data.activities
+                activity.duration = date.duration( activity_start,
+                                                   activity_duration_end )
+
+            return data
 
       getTasks = () ->
         sandglass.user_tasks_get( req, res )
-          .then ( rdata ) ->
-            if not rdata or not rdata.tasks
-              rdata.tasks = []
-
-            rdata.tasks
 
       getProjects = () ->
         sandglass.user_projects_get( req, res )
-          .then ( rdata ) ->
-            if not rdata or not rdata.projects
-              rdata.projects = []
-
-            rdata.projects
 
       # join seems to be more performant, than promise.all
       Promise.join( getActivities(), getTasks(), getProjects() )
-        .spread ( activities, tasks, projects ) ->
+        .spread ( activities_data, tasks_data, projects_data ) ->
+
           data =
-            activities: activities
-            tasks: tasks
-            projects: projects
+            activities: activities_data.activities or []
+            tasks: tasks_data.tasks or []
+            projects: projects_data.projects or []
 
           _.assign( res.data, data, getTemplateData() )
           res.render( 'start', res.data )

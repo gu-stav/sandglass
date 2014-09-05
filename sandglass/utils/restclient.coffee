@@ -2,9 +2,6 @@ Promise = require( 'bluebird' )
 rest = require( 'restler' )
 url = require( 'url' )
 
-createSuccess = ( data ) ->
-  data
-
 createFail = ( data ) ->
   data
 
@@ -44,14 +41,16 @@ rest_urls =
 
       request_url += "#{get}"
 
+    request_data = createData( req )
+
     new Promise ( resolve, reject ) =>
-      @[method]( request_url, createData( req ) )
-        .on 'success', ( result_data, raw_response ) ->
+      @[method]( request_url, request_data )
+        .on 'complete', ( result_data, raw_response ) ->
           res.set( raw_response.headers )
           res.set({
             'Content-Type': 'text/html; charset=utf-8'
             })
-          resolve( createSuccess( result_data ), raw_response )
+          resolve( result_data, raw_response )
         .on 'fail', ( result_data, raw_response ) ->
           reject( createFail( result_data, raw_response ) )
 
@@ -72,5 +71,14 @@ rest_urls =
 
   auth_get: ( req, res, get ) ->
     @._user_resource_get( null, req, res, get )
+
+  activity_post: ( req, res, get ) ->
+    @._user_resource_get( 'activities', req, res, get, 'post' )
+
+  activity_task_post: ( id, req, res, get ) ->
+    @._user_resource_get( 'activities/' + id + '/tasks', req, res, get, 'post' )
+
+  activity_project_post: ( id, req, res, get ) ->
+    @._user_resource_get( 'activities/' + id + '/projects', req, res, get, 'post' )
 
 module.exports = rest.service( rest_init, rest_defaults, rest_urls )

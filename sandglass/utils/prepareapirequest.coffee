@@ -35,6 +35,9 @@ prepare_request = ( req, res, next ) ->
   req.saveUser = ( user ) =>
     req.sandglass.user = user
 
+  req.getEnviroment = () =>
+    return 'development'
+
   next()
 
 module.exports = prepare_request

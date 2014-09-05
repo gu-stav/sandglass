@@ -11,7 +11,7 @@ error_handler = ( err, req, res, next ) =>
   if not message
     message = 'An error occurred'
 
-  if @.getEnviroment() is 'development'
+  if req.getEnviroment() is 'development'
     console.error( err.stack )
 
   if not status

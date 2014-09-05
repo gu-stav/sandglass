@@ -65,8 +65,9 @@ block header
                placeholder="Project" ).inp.track_inp.track_inp--first
 
         datalist#track_projects
-          each project in projects
-            option(value= project.title)
+          if projects && projects.length
+            each project in projects
+              option(value= project.title)
 
       div.form-group
         input( type="text",
@@ -75,8 +76,9 @@ block header
                placeholder="Task" ).inp.track_inp.track_inp--second
 
         datalist#track_tasks
-          each task in tasks
-            option(value= task.title)
+          if tasks && tasks.length
+            each task in tasks
+              option(value= task.title)
 
       div.form-group
         input( type="text",

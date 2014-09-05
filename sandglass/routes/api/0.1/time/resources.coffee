@@ -39,8 +39,20 @@ module.exports = ( app ) ->
 
         return result
 
-      createPromiseChain = ( url_parts ) ->
+      createPromiseChain = ( url_parts, method ) ->
         result = []
+
+        isChangeMethod = ( method ) ->
+          change_methods = [
+            'post',
+            'put',
+            'patch'
+          ]
+
+          change_methods.indexOf( method ) isnt -1
+
+        isResource = ( mapping, part ) ->
+          mapping[ part ]
 
         for part, index in url_parts
           model_name = mapping[ part ]
@@ -49,18 +61,29 @@ module.exports = ( app ) ->
             next_part = parts[ index + 1 ]
             promise_data = [ model_name ]
 
+            if next_part and
+               not isResource( mapping, next_part ) and
+               isChangeMethod( method )
+              promise_data.push( [ 'get', 'get' ] )
+            else
+              promise_data.push( [ method, req_method ] )
+
             if next_part
               # is not a valid model, so must be an identifier
-              if not mapping[ next_part ]
+              if not isResource( mapping, next_part )
                 promise_data.push( next_part )
 
             result.push( promise_data )
 
         return result
 
-      resolvePromiseChain = ( data, promiseData ) ->
-        model_name = promiseData[ 0 ]
-        id = promiseData[ 1 ]
+      resolvePromiseChain = ( data, promise_data ) ->
+        model_name = promise_data[ 0 ]
+        local_request_object = promise_data[ 1 ]
+        id = promise_data[ 2 ]
+
+        local_action = local_request_object[ 0 ]
+        local_request_method = local_request_object[ 1 ]
 
         # first run
         if not data
@@ -71,25 +94,20 @@ module.exports = ( app ) ->
           err_msg = "#{model_name} not known"
           return Promise.reject( new errors.BadRequest( err_msg ) )
 
-        if app.models[ model_name ].actionSupported? and not
-           app.models[ model_name ].actionSupported( method, req_method )
-          return Promise.reject( new errors.NotImplemented( req_method ) )
+        if app.models[ model_name ].actionSupported and not
+           app.models[ model_name ].actionSupported( local_action, local_request_method )
+          return Promise.reject( new errors.NotImplemented( local_action ) )
 
         # invalid request method
-        if action? not app.models[ model_name ][ method ]?
-          return Promise.reject( new errors.NotImplemented( req_method ) )
-
-        # invalid action
-        if not action? and not app.models[ model_name ][ method ]?
-          err_msg = "#{method} not implemented for #{ model_name }"
-          return Promise.rejct( new errors.BadRequest( err_msg ) )
+        if action? not app.models[ model_name ][ local_action ]?
+          return Promise.reject( new errors.NotImplemented( local_action ) )
 
         Model = app.models[ model_name ]
 
-        if method is 'post'
-          promise = app.models[ model_name ][ method ]( req, req.sandglass.context, res )
+        if local_request_method is 'post'
+          promise = app.models[ model_name ][ local_action ]( req, req.sandglass.context, res )
         else
-          promise = app.models[ model_name ][ method ]( req, req.sandglass.context, id, res )
+          promise = app.models[ model_name ][ local_action ]( req, req.sandglass.context, id, res )
 
         promise
           .catch( Promise.reject )
@@ -114,7 +132,7 @@ module.exports = ( app ) ->
       mapping = createModelMapping( app.models )
 
       # create [ ModelName: #ID (opt.) ] arrray
-      promises = createPromiseChain( parts )
+      promises = createPromiseChain( parts, method )
 
       controller = new JSONController( req, res, next )
       controller.before( auth_user )

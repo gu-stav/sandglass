@@ -2,52 +2,49 @@ express = require( 'express' )
 moment = require( 'moment' )
 Promise = require( 'bluebird' )
 rest = require( 'restler' )
-
+Restclient = require( '../utils/restclient' )
 
 module.exports = ( app ) ->
+  sandglass = new Restclient( app )
+
   router = express.Router()
     .post '/activity', [ app.sessionAuth ], ( req, res, next ) ->
       createActivity = () ->
-        url =  "#{app.options.host}/users/#{res.data.user.id}/activities"
-
-        new Promise ( resolve, reject ) ->
-          rest.post( url, { data: req.body, headers: req.headers } )
-            .on 'complete', ( result ) ->
-              resolve( result.activities[ 0 ] )
+        sandglass.activity_post( req, res )
+          .then ( data ) ->
+            data.activities
 
       createTask = ( activity ) ->
-        url = "#{app.options.host}/users/#{res.data.user.id}/activities/#{activity.id}/tasks"
-
         data =
-          title: req.body.task
+          body:
+            title: req.body.task
+          headers: req.headers
 
-        new Promise ( resolve, reject ) ->
-          rest.post( url, { data: data, headers: req.headers } )
-            .on 'complete', ( result ) ->
-              resolve( result.tasks )
+        sandglass.activity_task_post( activity.id, data, res )
+          .then ( data ) ->
+            data.tasks
 
       createProject = ( activity ) ->
-        url = "#{app.options.host}/users/#{res.data.user.id}/activities/#{activity.id}/projects"
-
         data =
-          title: req.body.project
+          body:
+            title: req.body.project
+          headers: req.headers
 
-        new Promise ( resolve, reject ) ->
-          rest.post( url, { data: data, headers: req.headers } )
-            .on 'complete', ( result ) ->
-              resolve( result.projects )
+        sandglass.activity_project_post( activity.id, data, res )
+          .then ( data ) ->
+            data.projects
 
       createActivity()
         .then ( activity ) ->
-          new Promise ( resolve, reject ) ->
-            createTask( activity )
-              .then ( task ) ->
-                resolve( activity )
+          createTask( activity )
+            .then ( task ) ->
+              return activity
+
         .then ( activity ) ->
-          new Promise ( resolve, reject ) ->
-            createProject( activity )
-              .then ( project ) ->
-                resolve( activity )
+          createProject( activity )
+            .then ( project ) ->
+              return activity
+
         .then () ->
           res.redirect( 'back' )
 
