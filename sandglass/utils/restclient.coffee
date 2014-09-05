@@ -33,19 +33,19 @@ rest_urls =
     if not resource
       resource = ''
 
-    url = "#{this.baseUrl}/users/#{userId}"
+    request_url = "#{this.baseUrl}/users/#{userId}"
 
     if resource
-      url += "/#{resource}"
+      request_url += "/#{resource}"
 
     if get
       if typeof get is 'object'
         get = url.format( query: get )
 
-      url += "#{get}"
+      request_url += "#{get}"
 
     new Promise ( resolve, reject ) =>
-      @[method]( url, createData( req ) )
+      @[method]( request_url, createData( req ) )
         .on 'success', ( result_data, raw_response ) ->
           res.set( raw_response.headers )
           res.set({

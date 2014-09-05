@@ -63,7 +63,7 @@ class Sandglass
     # auth middleware
     app.sessionAuth = ( req, res, next ) =>
       sandglass = new Restclient( app )
-      session = req.cookies[ app.options_api.cookie.name ] or undefined
+      session = req.cookies.auth or undefined
 
       sandglass.auth_get( req, res, '?action=session' )
         .catch () ->
