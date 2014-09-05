@@ -69,7 +69,7 @@ class Controller
       @_res.json( response ).end()
 
   before: ( promise ) =>
-    @_beforeFilters.push( promise( @, @_req, @_res, @_next ) )
+    @_beforeFilters.push( promise( @, @_req, @_res ) )
 
 class JSONController extends Controller
 

@@ -1,3 +1,4 @@
+crud = require( '../utils/crud.coffee' )
 errors = require( '../errors/index.coffee' )
 Promise = require( 'bluebird' )
 

@@ -8,7 +8,7 @@ url = require( 'url' );
 module.exports = ( app ) ->
   express.Router( app.options.base )
     .all '*', ( req, res, next ) ->
-      auth_user = ( controller, req, res, next ) ->
+      auth_user = ( controller, req, res ) ->
         action = req.param('action')
 
         session_ignore = [
@@ -68,20 +68,20 @@ module.exports = ( app ) ->
         # invalid model name
         if not app.models[ model_name ]
           err_msg = "#{model_name} not known"
-          return Promise.reject( errors.BadRequest( err_msg ) )
+          return Promise.reject( new errors.BadRequest( err_msg ) )
 
         if app.models[ model_name ].actionSupported? and not
            app.models[ model_name ].actionSupported( method, req_method )
-          return Promise.reject( errors.NotImplemented( req_method ) )
+          return Promise.reject( new errors.NotImplemented( req_method ) )
 
         # invalid request method
         if action? not app.models[ model_name ][ method ]?
-          return Promise.reject( errors.NotImplemented( req_method ) )
+          return Promise.reject( new errors.NotImplemented( req_method ) )
 
         # invalid action
         if not action? and not app.models[ model_name ][ method ]?
           err_msg = "#{method} not implemented for #{ model_name }"
-          return Promise.rejct( errors.BadRequest( err_msg ) )
+          return Promise.rejct( new errors.BadRequest( err_msg ) )
 
         Model = app.models[ model_name ]
 

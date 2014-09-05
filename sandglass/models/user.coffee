@@ -76,7 +76,7 @@ module.exports = ( sequelize, DataTypes ) ->
 
         new Promise ( resolve, reject ) =>
           if not data._rawPassword
-            return reject( errors.BadRequest( '_rawPassword not submitted' ) )
+            return reject( new errors.BadRequest( '_rawPassword not submitted' ) )
 
           bcrypt.genSalt 12, ( err, salt ) =>
             if err

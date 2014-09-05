@@ -19,7 +19,7 @@ READ = ( find, id ) ->
     @.findAll( find )
       .then ( instances ) =>
         if id and not instances.length
-          return reject( errors.NotFound( @.name ) )
+          return reject( new errors.NotFound( @.name ) )
 
         if id?
           resolve( instances[0] )
