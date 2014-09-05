@@ -139,7 +139,7 @@ module.exports = ( sequelize, DataTypes ) ->
           crud.READ.call( @, find, true )
             .catch( reject )
             .then ( user ) =>
-              if user.session = req.sandglass.user.session
+              if user.session = req.getSessionCookie()
                 return resolve( user )
 
               bcrypt.compare password, user.password, ( err, res ) =>
@@ -160,11 +160,13 @@ module.exports = ( sequelize, DataTypes ) ->
                 user.updateAttributes( update )
                   .then () =>
                     # set response cookie
-                    cookieName = @.__app.options.cookie.name
-                    cookieOptions = @.__app.options.cookie.options
-                    session = user.session
-                    req.sandglass.data.cookie = [ cookieName, session, cookieOptions ]
+                    cookie_data = [
+                      req.getSessionCookieName(),
+                      user.session,
+                      req.getSessionCookieOptions()
+                    ]
 
+                    req.saveCookie( cookie_data )
                     resolve( user )
 
     instanceMethods:

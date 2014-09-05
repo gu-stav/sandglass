@@ -2,9 +2,11 @@ _ = require( 'lodash' )
 bodyParser = require( 'body-parser')
 cookieParser = require('cookie-parser')
 express = require( 'express' )
+prepare_request = require( './utils/prepareapirequest.coffee' )
 Promise = require( 'bluebird' )
 Restclient = require( './utils/restclient.coffee' )
 Sequelize = require( 'sequelize' )
+error_handler = require( './utils/errorhandler.coffee' )
 
 class Sandglass
   constructor: ->
@@ -15,9 +17,6 @@ class Sandglass
 
     defaults.api      = @.getConfig( 'api' )
     defaults.frontend = @.getConfig( 'frontend' )
-
-    defaults.api.cookie.options.expires =
-        new Date( Date.now() + parseInt( defaults.api.cookie.options.expires ) )
 
     @options = defaults
 
@@ -82,51 +81,20 @@ class Sandglass
     app.db = @setupDatabase( @.getConfig( 'database' ) )
     app.models = @setupModels( app.db, app )
 
+    # pretty print the JSON
     if @.getEnviroment() is 'development'
       app.set( 'json spaces', 2 )
 
     @setupMiddleware( app )
 
-    # initialize response object
-    app.use ( req, res, next ) ->
-      # hold collected data
-      res.data = {}
-      # hold collected errors
-      res.errors = []
+    # initialize the datastore
+    app.use( prepare_request )
 
-      # central datastore
-      req.sandglass =
-        context: {}
-        user: {}
-        data: {}
-
-      req.getSessionCookie = () ->
-        req.cookies[ app.options.cookie.name ] or undefined
-
-      next()
-
+    # routes
     @mount( app, require( './routes/api/index.coffee' )( app ) )
 
-    app.use ( err, req, res, next ) =>
-      stack = err.stack
-      message = err.message
-      status = err.code
-      response =
-        message: message
-
-      if err.field
-        response.field = err.field
-
-      if not message
-        message = 'An error occurred'
-
-      if @.getEnviroment() is 'development'
-        console.error( err.stack )
-
-      if not status
-        status = 500
-
-      res.status( status ).json( errors: [ response ] )
+    # error handler
+    app.use( error_handler )
 
     return app
 

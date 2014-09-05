@@ -24,8 +24,9 @@ module.exports = ( app ) ->
 
       req_data = headers: req.headers
 
-      get_data = '?from=' + encode( date.format( from ) ) +
-                 '&to=' + encode( date.format( to ) )
+      get_data =
+        from: encode( date.format( from ) )
+        to: encode( date.format( to ) )
 
       getTemplateData = () ->
         week_ahead = to.clone().add( 1, 'weeks' )

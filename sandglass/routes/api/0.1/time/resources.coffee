@@ -24,7 +24,8 @@ module.exports = ( app ) ->
         app.models.User.session( req )
           .catch( controller.error )
           .then ( user ) ->
-            req.sandglass.context.user = req.sandglass.user = user
+            req.saveContext( 'user', user )
+            req.saveUser( user )
 
       createModelMapping = ( models ) ->
         result = {}
@@ -95,7 +96,8 @@ module.exports = ( app ) ->
           .then ( instance ) ->
             if instance
               model_name = model_name.toLowerCase()
-              req.sandglass.context[ model_name ] = data[ model_name ] = instance
+              req.saveContext( model_name, instance )
+              data[ model_name ] = instance
 
       # split up the url - forget about get parameters
       parts = url.parse( req.url ).pathname.split( '/' )

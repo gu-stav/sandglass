@@ -1,5 +1,6 @@
 Promise = require( 'bluebird' )
 rest = require( 'restler' )
+url = require( 'url' )
 
 createSuccess = ( data ) ->
   data
@@ -32,17 +33,18 @@ rest_urls =
     if not resource
       resource = ''
 
+    url = "#{this.baseUrl}/users/#{userId}"
+
+    if resource
+      url += "/#{resource}"
+
+    if get
+      if typeof get is 'object'
+        get = url.format( query: get )
+
+      url += "#{get}"
+
     new Promise ( resolve, reject ) =>
-      url = "#{this.baseUrl}/users/#{userId}"
-
-      if resource
-        url += "/#{resource}"
-
-      if get
-        url += "#{get}"
-
-      console.log( method, 'request to', url )
-
       @[method]( url, createData( req ) )
         .on 'success', ( result_data, raw_response ) ->
           res.set( raw_response.headers )
