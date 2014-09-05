@@ -23,34 +23,48 @@ class Controller
 
   _response: ( data ) =>
     response = {}
+    cookie = @_req.sandglass.data.cookie
+    renderer = @_renderer
 
-    if not @_renderer
+    if not renderer
+      render = 'json'
+
+    if renderer is 'json'
       processDataEntry = ( entry ) ->
-        if entry.Model?
-          if entry.render?
-            processed = entry.render()
-          else
-            processed = entry.toJSON()
+        if entry.render?
+          processed = entry.render()
+        else
+          processed = entry.toJSON()
+
+      # returns a pluralform of the model
+      getPlural = ( entry ) ->
+        entry.__options.name.plural.toLowerCase()
+
+      # returns if an object is a sequelize model
+      is_sequelize_model = ( entry ) ->
+        return entry.Model or undefined
+
+      # empty response
+      if not data
+        return @_res.status( 201 ).send().end()
 
       if _.isArray( data )
         for data_val in data
-          if data_val.Model
+          if is_sequelize_model( data_val )
             result = processDataEntry( data_val )
-            data_val_index = data_val.__options.name.plural.toLowerCase()
+            plural = getPlural( data_val )
 
-            if not response[ data_val_index ]
-              response[ data_val_index ] = [ result ]
+            if not response[ plural ]
+              response[ plural ] = [ result ]
             else
-              response[ data_val_index ].push( result )
-
+              response[ plural ].push( result )
       else
-        if data and data.__options
-          response[ data.__options.name.plural.toLowerCase() ] = processDataEntry( data )
+        if is_sequelize_model( data )
+          plural = getPlural( data )
+          response[ plural ] = processDataEntry( data )
 
-      if @_req.sandglass.data.cookie
-        @_res.cookie( @_req.sandglass.data.cookie[0],
-                     @_req.sandglass.data.cookie[1],
-                     @_req.sandglass.data.cookie[2] )
+      if cookie and _.isArray( cookie )
+        @_res.cookie( cookie[0], cookie[1], cookie[2] )
 
       @_res.json( response ).end()
 

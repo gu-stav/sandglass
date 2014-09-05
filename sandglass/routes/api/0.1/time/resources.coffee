@@ -22,7 +22,7 @@ module.exports = ( app ) ->
           return Promise.resolve()
 
         app.models.User.session( req )
-          .catch( Promise.reject )
+          .catch( controller.error )
           .then ( user ) ->
             req.sandglass.context.user = req.sandglass.user = user
 
@@ -120,6 +120,4 @@ module.exports = ( app ) ->
       Promise
         .reduce( promises, resolvePromiseChain, 0 )
         .catch( controller.error )
-        .then ( data ) ->
-          console.log( 'finally get', data )
-          controller.render( data )
+        .then( controller.render )

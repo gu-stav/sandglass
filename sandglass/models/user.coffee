@@ -63,7 +63,7 @@ module.exports = ( sequelize, DataTypes ) ->
         session = req.getSessionCookie()
 
         if not session
-          return Promise.reject( errors.BadRequest( 'No session cookie submitted' ) )
+          return Promise.reject( new errors.BadRequest( 'No session cookie submitted' ) )
 
         find =
             where:
@@ -127,10 +127,10 @@ module.exports = ( sequelize, DataTypes ) ->
           email = data.email
 
           if not email
-            return reject( errors.BadRequest( 'Invalid Email', 'email' ) )
+            return reject( new errors.BadRequest( 'Invalid Email', 'email' ) )
 
           if not password
-            return reject( errors.BadRequest( 'Invalid password', 'password' ) )
+            return reject( new errors.BadRequest( 'Invalid password', 'password' ) )
 
           find =
             where:
@@ -147,7 +147,7 @@ module.exports = ( sequelize, DataTypes ) ->
                   return reject( err )
 
                 if not res
-                  return reject( errors.BadRequest( 'Invalid login credentials' ) )
+                  return reject( new errors.BadRequest( 'Invalid login credentials' ) )
 
                 # create new session
                 session = crypto.createHash( 'sha1' )

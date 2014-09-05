@@ -105,7 +105,7 @@ module.exports = ( sequelize, DataTypes ) ->
           @.find( find )
             .then ( activity ) ->
               if not activity
-                return reject( errors.NotFound( 'Activity' ) )
+                return reject( new errors.NotFound( 'Activity' ) )
 
               activity.updateAttributes( data )
                 .then ( activity ) ->
@@ -124,7 +124,7 @@ module.exports = ( sequelize, DataTypes ) ->
           @.find( find )
             .then ( activity ) ->
               if not activity
-                return reject( errors.NotFound( 'Activity not found' ) )
+                return reject( new errors.NotFound( 'Activity not found' ) )
 
               activity.destroy()
                 .then ( activity ) ->
