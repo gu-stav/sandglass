@@ -45,7 +45,7 @@ rest_urls =
 
     new Promise ( resolve, reject ) =>
       @[method]( request_url, request_data )
-        .on 'complete', ( result_data, raw_response ) ->
+        .on 'success', ( result_data, raw_response ) ->
           res.set( raw_response.headers )
           res.set({
             'Content-Type': 'text/html; charset=utf-8'
