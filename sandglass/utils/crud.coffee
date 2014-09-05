@@ -28,14 +28,14 @@ read = ( find, id ) ->
       .catch( reject )
 
 update = ( find, data ) ->
-  READ( find )
+  read( find )
     .catch( Promise.reject )
     .then ( instance ) =>
       instance.updateAttributes( data )
     .catch( Promise.reject )
 
 destroy = ( find, id ) ->
-  READ( find, id )
+  read( find, id )
     .catch( Promise.reject )
     .then ( instance ) =>
       instance.destroy()
