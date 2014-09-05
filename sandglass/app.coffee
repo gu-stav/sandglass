@@ -2,11 +2,11 @@ _ = require( 'lodash' )
 bodyParser = require( 'body-parser')
 cookieParser = require('cookie-parser')
 express = require( 'express' )
-prepare_request = require( './utils/prepareapirequest.coffee' )
+prepare_request = require( './utils/prepareapirequest' )
 Promise = require( 'bluebird' )
-Restclient = require( './utils/restclient.coffee' )
+Restclient = require( './utils/restclient' )
 Sequelize = require( 'sequelize' )
-error_handler = require( './utils/errorhandler.coffee' )
+error_handler = require( './utils/errorhandler' )
 
 class Sandglass
   constructor: ->
@@ -72,7 +72,7 @@ class Sandglass
           res.data.user = users.users
           next()
 
-    @mount( app, require( './routes/index.coffee' )( app ) )
+    @mount( app, require( './routes/index' )( app ) )
     return app
 
   setupAPI: ( app ) ->
@@ -91,7 +91,7 @@ class Sandglass
     app.use( prepare_request )
 
     # routes
-    @mount( app, require( './routes/api/index.coffee' )( app ) )
+    @mount( app, require( './routes/api/index' )( app ) )
 
     # error handler
     app.use( error_handler )
@@ -100,7 +100,7 @@ class Sandglass
 
   # Sequelize-Models
   setupModels: ( db, app ) ->
-    models = require( './models/index.coffee' )( db )
+    models = require( './models/index' )( db )
 
     # automatically create associations between models
     for index, model of models
@@ -161,7 +161,7 @@ class Sandglass
 
   migrate: ( username, password, file ) ->
     new Promise ( resolve, reject ) =>
-      hamster_migrate = require( './hamster-migrate.coffee' )
+      hamster_migrate = require( './hamster-migrate' )
 
       if @options.migrations
         hamster_migrate( username, password, file )

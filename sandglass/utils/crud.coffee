@@ -1,4 +1,4 @@
-errors = require( '../errors/index.coffee' )
+errors = require( '../errors/index' )
 Promise = require( 'bluebird' )
 
 create = ( data ) ->

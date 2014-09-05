@@ -1,5 +1,5 @@
 express = require( 'express' )
-Restclient = require( '../utils/restclient.coffee' )
+Restclient = require( '../utils/restclient' )
 
 module.exports = ( app ) ->
   sandglass = new Restclient( app )

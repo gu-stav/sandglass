@@ -1,5 +1,5 @@
-JSONController = require( '../../../../utils/controller.coffee' ).JSONController
-errors = require( '../../../../errors/index.coffee' )
+JSONController = require( '../../../../utils/controller' ).JSONController
+errors = require( '../../../../errors/index' )
 express = require( 'express' )
 inflection = require( 'inflection' )
 Promise = require( 'bluebird' )

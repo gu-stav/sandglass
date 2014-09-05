@@ -1,6 +1,6 @@
-crud = require( '../utils/crud.coffee' )
-date = require( '../utils/date.coffee' )
-errors = require( '../errors/index.coffee' )
+crud = require( '../utils/crud' )
+date = require( '../utils/date' )
+errors = require( '../errors/index' )
 moment = require( 'moment' )
 Promise = require( 'bluebird' )
 

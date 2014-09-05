@@ -1,8 +1,8 @@
 _ = require( 'lodash' )
 bcrypt = require( 'bcrypt' )
-crud = require( '../utils/crud.coffee' )
+crud = require( '../utils/crud' )
 crypto = require( 'crypto' )
-errors = require( '../errors/index.coffee' )
+errors = require( '../errors/index' )
 Promise = require( 'bluebird' )
 
 module.exports = ( sequelize, DataTypes ) ->

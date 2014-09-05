@@ -1,11 +1,11 @@
 _ = require( 'lodash' )
-date = require( '../utils/date.coffee' )
-decode = require( '../utils/url.coffee' ).decode
-encode = require( '../utils/url.coffee' ).encode
+date = require( '../utils/date' )
+decode = require( '../utils/url' ).decode
+encode = require( '../utils/url' ).encode
 express = require( 'express' )
 moment = require( 'moment' )
 Promise = require( 'bluebird' )
-Restclient = require( '../utils/restclient.coffee' )
+Restclient = require( '../utils/restclient' )
 
 module.exports = ( app ) ->
   sandglass = new Restclient( app )

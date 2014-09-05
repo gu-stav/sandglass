@@ -1,7 +1,7 @@
-BadRequest = require( './badrequest.coffee' )
-NoPermission = require( './nopermission.coffee' )
-NotFound = require( './notfound.coffee' )
-NotImplemented = require( './notimplemented.coffee' )
+BadRequest = require( './badrequest' )
+NoPermission = require( './nopermission' )
+NotFound = require( './notfound' )
+NotImplemented = require( './notimplemented' )
 
 module.exports =
   BadRequest: BadRequest

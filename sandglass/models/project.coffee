@@ -1,5 +1,5 @@
-crud = require( '../utils/crud.coffee' )
-errors = require( '../errors/index.coffee' )
+crud = require( '../utils/crud' )
+errors = require( '../errors/index' )
 Promise = require( 'bluebird' )
 
 module.exports = ( sequelize, DataTypes ) ->
