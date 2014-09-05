@@ -66,8 +66,8 @@ module.exports = ( sequelize, DataTypes ) ->
           return Promise.reject( new errors.BadRequest( 'No session cookie submitted' ) )
 
         find =
-            where:
-              session: session
+          where:
+            session: session
 
         crud.READ.call( @, find, true )
 
