@@ -27,7 +27,7 @@ class Controller
     renderer = @_renderer
 
     if not renderer
-      render = 'json'
+      renderer = 'json'
 
     if renderer is 'json'
       processDataEntry = ( entry ) ->
