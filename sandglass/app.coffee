@@ -94,75 +94,11 @@ class Sandglass
       # hold collected errors
       res.errors = []
 
-      req.context = {}
-
-      # success handler
-      res.finish = ( data ) ->
-        response = {}
-
-        processDataEntry = ( entry ) ->
-          res_data = {}
-
-          if entry.Model?
-            if entry.render?
-              processed = entry.render()
-            else
-              processed = entry.toJSON()
-
-        if res.errors.length
-          response.errors = []
-
-          for error in res.errors
-            if error.field
-              err_data =
-                field: error.field
-                message: error.message
-
-              response.errors.push( err_data )
-            else
-              response.errors.push( error.message )
-
-        if _.isArray( data )
-          for data_val in data
-            if data_val.Model
-              result = processDataEntry( data_val )
-              data_val_index = data_val.__options.name.plural.toLowerCase()
-
-              if not response[ data_val_index ]
-                response[ data_val_index ] = [ result ]
-              else
-                response[ data_val_index ].push( result )
-
-        else
-          if data
-            response[ data.__options.name.plural.toLowerCase() ] = processDataEntry( data )
-
-        if res.data.cookie
-          res.cookie( res.data.cookie[0], res.data.cookie[1], res.data.cookie[2] )
-
-        res.json( response ).end()
-
-      # error handler
-      res.error = ( err ) ->
-        response = {}
-
-        if err
-          res.errors.push( err )
-
-        if res.errors.length
-          response.errors = []
-
-          for error in res.errors
-            if error.field
-              err_data =
-                field: error.field
-                message: error.message
-
-              response.errors.push( err_data )
-            else
-              response.errors.push( error.message )
-
-        res.json( response ).status( err.code ).end()
+      # central datastore
+      req.sandglass =
+        context: {}
+        user: {}
+        data: {}
 
       req.getSessionCookie = () ->
         req.cookies[ app.options.cookie.name ] or undefined
@@ -170,6 +106,10 @@ class Sandglass
       next()
 
     @mount( app, require( './routes/api/index.coffee' )( app ) )
+
+    app.use ( err, req, res, next ) ->
+      console.error(err.stack);
+      res.status(500).send('Something broke!');
 
     return app
 

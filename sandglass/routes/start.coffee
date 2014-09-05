@@ -8,13 +8,10 @@ Promise = require( 'bluebird' )
 Restclient = require( '../utils/restclient.coffee' )
 
 module.exports = ( app ) ->
-  DATE_FORMAT = app.options.dateFormat
   sandglass = new Restclient( app )
 
   router = express.Router()
     .get '/', [ app.sessionAuth ], ( req, res, next ) ->
-      userId = res.data.user.id
-
       if not req.param( 'from' )
         from = moment().subtract( 1, 'weeks' )
       else
@@ -55,8 +52,6 @@ module.exports = ( app ) ->
       getActivities = () ->
         sandglass.user_activities_get( req, res, get_data )
           .then ( data ) ->
-            console.log( 'got activities', data.activities )
-            
             if data.activities? and data.activities.length
               data.activities = _.groupBy data.activities, ( activity ) ->
                 return date.format( moment( activity.start ), 'Date' )
@@ -85,16 +80,16 @@ module.exports = ( app ) ->
 
             data.activities
 
-      getTasks = ( data ) ->
-        sandglass.user_tasks_get( req, res, get_data )
+      getTasks = () ->
+        sandglass.user_tasks_get( req, res )
           .then ( rdata ) ->
             if not rdata or not rdata.tasks
               rdata.tasks = []
 
             rdata.tasks
 
-      getProjects = ( data ) ->
-        sandglass.user_projects_get( req, res, get_data )
+      getProjects = () ->
+        sandglass.user_projects_get( req, res )
           .then ( rdata ) ->
             if not rdata or not rdata.projects
               rdata.projects = []

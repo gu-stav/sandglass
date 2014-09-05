@@ -18,45 +18,31 @@ module.exports = ( sequelize, DataTypes ) ->
         @.hasMany( models.Task )
         @.hasOne( models.Activity )
 
-        @.__models =
-          User:models.User
+      post: ( req, context, res ) ->
+        title = req.body.title
 
-      post: ( req, context ) ->
-        new Promise ( resolve, reject ) =>
-          title = req.body.title
+        find =
+          where:
+            title: req.body.title
+          defaults:
+            title: title
 
-          find =
-            where:
-              title: req.body.title
-            defaults:
-              title: title
+        if context? and context.user?
+          find.where.UserId = context.user.id
+          find.defaults.UserId = context.user.id
 
-          if context? and context.user?
-            context_user = context.user
-            find.where.UserId = context.user.id
+        if context? and context.activity?
+          context_activity = context.activity
 
-          if context? and context.activity?
-            context_activity = context.activity
+        crud.CREATE.call( @, find )
+          # set activity
+          .then ( project ) ->
+            if not context_activity
+              return Promise.resolve( project )
 
-          @.findOrCreate( find )
-            # set user
-            .spread ( project, created ) ->
-              if not context_user
-                return project
-
-              project.setUser( context_user )
-
-            # set activity
-            .then ( project ) ->
-              if not context_activity
-                return project
-
-              new Promise ( resolve, reject ) ->
-                context_activity.setProject( project )
-                  .then( resolve( project ), reject )
-
-            .then ( project ) ->
-              resolve( projects: [ project ] )
+            context_activity.setProject( project )
+              .then( Promise.resolve( project ) )
+              .catch( Promise.reject )
 
       get: ( req, context, id ) ->
         find =

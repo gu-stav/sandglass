@@ -1,19 +1,11 @@
 express = require( 'express' )
-rest = require( 'restler' )
+Restclient = require( '../utils/restclient.coffee' )
 
 module.exports = ( app ) ->
+  sandglass = new Restclient( app )
+
   router = express.Router()
-
-  router
     .get '/logout', ( req, res, next ) ->
-      url = "#{app.options.host}/logout"
-
-      data =
-        headers: req.headers
-
-      rest.get( url, data )
-        .on 'complete', ( jres, rres ) ->
-          res.set( rres.headers )
+      sandglass.user_logout_get( req, res, '?action=logout' )
+        .spread ( user, raw_response ) ->
           res.redirect( '/signup' )
-
-  router

@@ -48,6 +48,17 @@ module.exports = ( sequelize, DataTypes ) ->
         @.hasOne( models.Task )
         @.hasOne( models.Tag )
 
+      actionSupported: ( action, method ) ->
+        mapping =
+          session: [ 'get' ]
+          login:   [ 'post' ]
+          logout:  [ 'get' ]
+
+        if mapping[ action ]
+          mapping[ action ].indexOf( method ) isnt -1
+        else
+          action is method
+
       session: ( req, context, id, res ) ->
         session = req.getSessionCookie()
 
@@ -60,7 +71,7 @@ module.exports = ( sequelize, DataTypes ) ->
 
         crud.READ.call( @, find, true )
 
-      post: ( req ) ->
+      post: ( req, context ) ->
         data = req.body
 
         new Promise ( resolve, reject ) =>
@@ -77,7 +88,7 @@ module.exports = ( sequelize, DataTypes ) ->
 
               data.password = hash
 
-              @.create( data )
+              crud.CREATE.call( @, data )
                 .catch( reject )
                 .then ( user ) =>
                   @.__models.Role.getDefault()
@@ -88,18 +99,15 @@ module.exports = ( sequelize, DataTypes ) ->
                 .catch( reject )
 
       get: ( req, context, id ) ->
-        includes = [ @.__models.Role ]
-
         find =
           where: {}
-          include: includes
 
         if id?
           find.where.id = id
 
         crud.READ.call( @, find, id )
 
-      logout: ( req, response ) ->
+      logout: ( req, context, id, response ) ->
         new Promise ( resolve, reject ) =>
           session = req.getSessionCookie();
 
@@ -109,10 +117,10 @@ module.exports = ( sequelize, DataTypes ) ->
             .then ( user ) ->
               user.updateAttributes( session: null )
             .then ( user ) ->
-              resolve( users: [ user ] )
+              resolve( user )
             .catch( reject )
 
-      login: ( req, context, id, response ) ->
+      login: ( req, context, response ) ->
         new Promise ( resolve, reject ) =>
           data = req.body
           password = data.password
@@ -128,9 +136,12 @@ module.exports = ( sequelize, DataTypes ) ->
             where:
               email: email
 
-          crud.READ.call( @, find, id )
+          crud.READ.call( @, find, true )
             .catch( reject )
             .then ( user ) =>
+              if user.session = req.sandglass.user.session
+                return resolve( user )
+
               bcrypt.compare password, user.password, ( err, res ) =>
                 if err
                   return reject( err )
@@ -147,13 +158,14 @@ module.exports = ( sequelize, DataTypes ) ->
                   session: session
 
                 user.updateAttributes( update )
-                  .then ( user ) =>
+                  .then () =>
                     # set response cookie
                     cookieName = @.__app.options.cookie.name
                     cookieOptions = @.__app.options.cookie.options
                     session = user.session
-                    response.data.cookie = [ cookieName, session, cookieOptions ]
-                    resolve()
+                    req.sandglass.data.cookie = [ cookieName, session, cookieOptions ]
+
+                    resolve( user )
 
     instanceMethods:
       render: ( password = false, salt = false ) ->

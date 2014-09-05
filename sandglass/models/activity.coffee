@@ -36,28 +36,22 @@ module.exports = ( sequelize, DataTypes ) ->
         @.hasMany( models.Tag )
 
       post: ( req, context ) ->
-        new Promise ( resolve, reject ) =>
-          start = req.body.start or new Date()
-          end = req.body.end or undefined
-          description = req.body.description or ''
+        data = req.body
 
-          if context? and context.user?
-            context_user = context.user
+        start = data.start or new Date()
+        end = data.end or undefined
+        description = data.description or ''
 
-          create =
-            start: start
-            end: end
-            description: description
+        create =
+          start: start
+          end: end
+          description: description
 
-          @.create( create )
-            .catch( reject )
-            .then ( activity ) =>
-              if context_user
-                activity.setUser( context_user )
-              else
-                return activity
-            .then ( activity ) ->
-              resolve( activities: [ activity ] )
+        if context? and context.user?
+          context_user = context.user
+          create.UserId = context.user.id
+
+        crud.CREATE.call( @, create )
 
       get: ( req, context, id ) ->
         includes = [ @.__models.Task,
@@ -66,6 +60,7 @@ module.exports = ( sequelize, DataTypes ) ->
 
         from = req.param( 'from' )
         to = req.param( 'to' )
+
         find =
           where: {}
           include: includes

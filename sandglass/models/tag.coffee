@@ -16,58 +16,32 @@ module.exports = ( sequelize, DataTypes ) ->
         @.belongsTo( models.User )
         @.hasMany( models.Activity )
 
-        @.__models =
-          User:models.User
+      post: ( req, context, res ) ->
+        title = req.body.title
 
-      post: ( req, user ) ->
-        new Promise ( resolve, reject ) =>
-          title = req.body.title
-
-          if not title
-            return resolve()
-
-          where =
-            where:
-              title: req.body.title
-
-          create =
+        find =
+          where:
+            title: title
+          defaults:
             title: title
 
-          if user?
-            where.where.UserId = user.id
+        if context? and context.user?
+          find.where.UserId = context.user.id
+          find.defaults.UserId = context.user.id
 
-          @.find( where )
-            .then ( tag ) =>
-              if tag
-                return resolve( tag )
+        crud.CREATE.call( @, find )
 
-              @.create( create )
-                .then( tag ) ->
-                  if not user?
-                    return resolve( tag )
+      get: ( req, context, id ) ->
+        find =
+          where: {}
 
-                  @.__models.User.get( req, user.id, single: true )
-                    .then ( user ) ->
-                      tag.setUser( user )
-                        .then( resolve, reject )
+        if id?
+          find.where.id = id
 
-      get: ( req, user, id ) ->
-        return new Promise ( resolve, reject ) =>
-          find =
-            where: {}
+        if context? and context.user?
+          find.where.UserId = context.user.id
 
-          if user?
-            find.where.UserId = user.id
-
-          if id?
-            find.where.id = id
-
-          @.findAll( where )
-            .then ( tags ) ->
-              if id? and not tags.length
-                return reject( errors.NotFound( 'Tag' ) )
-
-              resolve( tags: tags )
+        crud.READ.call( @, find, id )
     }
 
   )

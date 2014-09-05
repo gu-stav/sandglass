@@ -1,3 +1,4 @@
+JSONController = require( '../../../../utils/controller.coffee' ).JSONController
 errors = require( '../../../../errors/index.coffee' )
 express = require( 'express' )
 inflection = require( 'inflection' )
@@ -6,31 +7,25 @@ url = require( 'url' );
 
 module.exports = ( app ) ->
   express.Router( app.options.base )
+    .all '*', ( req, res, next ) ->
+      auth_user = ( controller, req, res, next ) ->
+        action = req.param('action')
 
-    # auth middleware
-    .use ( req, res, next ) ->
-      action = req.param('action')
+        session_ignore = [
+          'login',
+          'signup',
+          'session'
+        ]
 
-      session_ignore = [
-        'login',
-        'signup',
-        'session'
-      ]
+        # these actions don't require a logged in user - all the others do
+        if session_ignore.indexOf( action ) isnt -1
+          return Promise.resolve()
 
-      # these actions don't require a logged in user - all the others do
-      if session_ignore.indexOf( action ) isnt -1
-        return next()
+        app.models.User.session( req )
+          .catch( Promise.reject )
+          .then ( user ) ->
+            req.sandglass.context.user = req.sandglass.user = user
 
-      app.models.User.session( req )
-        .then ( user ) ->
-          req.user = user
-          req.context.user = user
-          next()
-        .catch ( err ) ->
-          res.error( err )
-          next()
-
-    .all '*', ( req, res ) ->
       createModelMapping = ( models ) ->
         result = {}
 
@@ -49,16 +44,16 @@ module.exports = ( app ) ->
         for part, index in url_parts
           model_name = mapping[ part ]
 
-        if model_name
-          next_part = parts[ index + 1 ]
-          promise_data = [ model_name ]
+          if model_name
+            next_part = parts[ index + 1 ]
+            promise_data = [ model_name ]
 
-          if next_part
-            # is not a valid model, so must be an identifier
-            if not mapping[ next_part ]
-              promise_data.push( next_part )
+            if next_part
+              # is not a valid model, so must be an identifier
+              if not mapping[ next_part ]
+                promise_data.push( next_part )
 
-          result.push( promise_data )
+            result.push( promise_data )
 
         return result
 
@@ -75,31 +70,43 @@ module.exports = ( app ) ->
           err_msg = "#{model_name} not known"
           return Promise.reject( errors.BadRequest( err_msg ) )
 
+        if app.models[ model_name ].actionSupported? and not
+           app.models[ model_name ].actionSupported( method, req_method )
+          return Promise.reject( errors.NotImplemented( req_method ) )
+
         # invalid request method
         if action? not app.models[ model_name ][ method ]?
-          return Promise.reject( errors.NotImplemented( method ) )
+          return Promise.reject( errors.NotImplemented( req_method ) )
 
         # invalid action
         if not action? and not app.models[ model_name ][ method ]?
           err_msg = "#{method} not implemented for #{ model_name }"
           return Promise.rejct( errors.BadRequest( err_msg ) )
 
-        # execute given method on the model
-        app.models[ model_name ][ method ]( req, req.context, id, res )
+        Model = app.models[ model_name ]
+
+        if method is 'post'
+          promise = app.models[ model_name ][ method ]( req, req.sandglass.context, res )
+        else
+          promise = app.models[ model_name ][ method ]( req, req.sandglass.context, id, res )
+
+        promise
           .catch( Promise.reject )
           .then ( instance ) ->
             if instance
               model_name = model_name.toLowerCase()
-              req.context[ model_name ] = data[ model_name ] = instance
+              req.sandglass.context[ model_name ] = data[ model_name ] = instance
 
       # split up the url - forget about get parameters
       parts = url.parse( req.url ).pathname.split( '/' )
+
+      req_method = req.method.toLowerCase()
 
       # action: overwrites method
       action = req.param('action')
 
       # request method
-      method = action or req.method.toLowerCase()
+      method = action or req_method
 
       # supported models
       mapping = createModelMapping( app.models )
@@ -107,7 +114,12 @@ module.exports = ( app ) ->
       # create [ ModelName: #ID (opt.) ] arrray
       promises = createPromiseChain( parts )
 
+      controller = new JSONController( req, res, next )
+      controller.before( auth_user )
+
       Promise
         .reduce( promises, resolvePromiseChain, 0 )
-        .catch( res.error )
-        .then( res.finish )
+        .catch( controller.error )
+        .then ( data ) ->
+          console.log( 'finally get', data )
+          controller.render( data )

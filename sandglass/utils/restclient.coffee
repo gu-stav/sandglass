@@ -65,6 +65,9 @@ rest_urls =
   user_login_post: ( req, res, get ) ->
     @._user_resource_get( null, req, res, get, 'post' )
 
+  user_logout_get: ( req, res, get ) ->
+    @._user_resource_get( null, req, res, get )
+
   auth_get: ( req, res, get ) ->
     @._user_resource_get( null, req, res, get )
 
