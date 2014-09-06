@@ -28,16 +28,17 @@ read = ( find, id ) ->
       .catch( reject )
 
 update = ( find, data ) ->
-  read( find )
+  read.call( @, find, true )
     .catch( Promise.reject )
-    .then ( instance ) =>
+    .then ( instance ) ->
       instance.updateAttributes( data )
     .catch( Promise.reject )
+    .then( Promise.resolve )
 
 destroy = ( find, id ) ->
-  read( find, id )
+  read.call( @, find, id )
     .catch( Promise.reject )
-    .then ( instance ) =>
+    .then ( instance ) ->
       instance.destroy()
     .catch( Promise.reject )
 

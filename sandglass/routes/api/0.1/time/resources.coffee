@@ -46,13 +46,14 @@ module.exports = ( app ) ->
           change_methods = [
             'post',
             'put',
-            'patch'
+            'patch',
+            'delete',
           ]
 
           change_methods.indexOf( method ) isnt -1
 
         isResource = ( mapping, part ) ->
-          mapping[ part ]
+          mapping[ part ]?
 
         for part, index in url_parts
           model_name = mapping[ part ]
@@ -62,11 +63,9 @@ module.exports = ( app ) ->
             promise_data = [ model_name ]
 
             if next_part and
-               not isResource( mapping, next_part ) and
-               isChangeMethod( method )
               promise_data.push( [ 'get', 'get' ] )
             else
-              promise_data.push( [ method, req_method ] )
+              promise_data.push( [ method, 'get' ] )
 
             if next_part
               # is not a valid model, so must be an identifier
@@ -74,6 +73,12 @@ module.exports = ( app ) ->
                 promise_data.push( next_part )
 
             result.push( promise_data )
+
+        # if the request will change data, only apply it to the last resource
+        if isChangeMethod( method )
+          [ ..., last ] = result
+          last[ 1 ][ 0 ] = method
+          last[ 1 ][ 1 ] = req_method
 
         return result
 
@@ -94,20 +99,20 @@ module.exports = ( app ) ->
           err_msg = "#{model_name} not known"
           return Promise.reject( new errors.BadRequest( err_msg ) )
 
-        if app.models[ model_name ].actionSupported and not
-           app.models[ model_name ].actionSupported( local_action, local_request_method )
+        Model = app.models[ model_name ]
+
+        if Model.actionSupported? and not
+           Model.actionSupported( local_action, local_request_method )
           return Promise.reject( new errors.NotImplemented( local_action ) )
 
         # invalid request method
-        if action? not app.models[ model_name ][ local_action ]?
+        if action? not Model[ local_action ]?
           return Promise.reject( new errors.NotImplemented( local_action ) )
 
-        Model = app.models[ model_name ]
-
         if local_request_method is 'post'
-          promise = app.models[ model_name ][ local_action ]( req, req.sandglass.context, res )
+          promise = Model[ local_action ]( req, req.sandglass.context, res )
         else
-          promise = app.models[ model_name ][ local_action ]( req, req.sandglass.context, id, res )
+          promise = Model[ local_action ]( req, req.sandglass.context, id, res )
 
         promise
           .catch( Promise.reject )

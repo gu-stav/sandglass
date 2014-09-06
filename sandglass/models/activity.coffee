@@ -35,6 +35,9 @@ module.exports = ( sequelize, DataTypes ) ->
 
         @.hasMany( models.Tag )
 
+      actionSupported: ( action, method ) ->
+        action is method
+
       post: ( req, context ) ->
         data = req.body
 
@@ -92,7 +95,7 @@ module.exports = ( sequelize, DataTypes ) ->
 
         crud.READ.call( @, find, id )
 
-      update: ( req, context, id ) ->
+      put: ( req, context, id ) ->
         data = req.body
         find =
           where:

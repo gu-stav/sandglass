@@ -49,25 +49,19 @@ module.exports = ( app ) ->
           res.redirect( 'back' )
 
     .post '/activity/:activityId/stop', [ app.sessionAuth ], ( req, res, next ) ->
-      activityId = req.param( 'activityId' )
-      url = "#{app.options.host}/users/#{res.data.user.id}/activities/#{activityId}"
-
       data =
-        data:
+        body:
           end: moment().format()
         headers: req.headers
 
-      rest.put( url, data )
-        .on 'complete', ( jres ) ->
+      sandglass.activity_put( req.param( 'activityId' ), data, res )
+        .then ( activity ) ->
           res.redirect( 'back' )
 
     .post '/activity/:activityId/delete', [ app.sessionAuth ], ( req, res, next ) ->
-      activityId = req.param( 'activityId' )
-      url = "#{app.options.host}/users/#{res.data.user.id}/activities/#{activityId}"
-
       data =
         headers: req.headers
 
-      rest.del( url, data )
-        .on 'complete', ( jres ) ->
+      sandglass.activity_delete( req.param( 'activityId' ), data, res )
+        .then ( activity ) ->
           res.redirect( 'back' )

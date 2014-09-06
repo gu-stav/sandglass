@@ -81,4 +81,10 @@ rest_urls =
   activity_project_post: ( id, req, res, get ) ->
     @._user_resource_get( 'activities/' + id + '/projects', req, res, get, 'post' )
 
+  activity_put: ( id, req, res, get ) ->
+    @._user_resource_get( 'activities/' + id , req, res, get, 'put' )
+
+  activity_delete: ( id, req, res, get ) ->
+    @._user_resource_get( 'activities/' + id , req, res, get, 'del' )
+
 module.exports = rest.service( rest_init, rest_defaults, rest_urls )
