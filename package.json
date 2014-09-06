@@ -18,7 +18,7 @@
     "lodash": "^2.4.1",
     "pg": "^3.4.2",
     "restler": "^3.2.2",
-    "sequelize": "^2.0.0-dev13",
+    "sequelize": "^2.0.0-dev13"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
