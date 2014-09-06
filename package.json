@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "main": "index.js",
   "author": "Gustav Pursche <gustavpursche@gmail.com>",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "bcrypt": "^0.8.0",
     "bluebird": "^2.3.2",
