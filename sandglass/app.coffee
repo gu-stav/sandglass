@@ -21,7 +21,7 @@ class Sandglass
     @options = defaults
 
   getEnviroment: () ->
-    process.env.ENVIROMENT || 'development'
+    process.env.NODE_ENV || 'development'
 
   # read a certain config file
   getConfig: ( index ) ->
@@ -78,7 +78,19 @@ class Sandglass
   setupAPI: ( app ) ->
     app.options = @options.api
 
-    app.db = @setupDatabase( @.getConfig( 'database' ) )
+    if @.getEnviroment() is 'production'
+      database_config =
+        name: process.env.DATABASE_NAME
+        username: process.env.DATABASE_USER
+        password: process.env.DATABASE_PASSWORD
+        host: process.env.DATABASE_HOST
+        options:
+          dialect: 'postgres'
+          port: process.env.DATABASE_PORT
+    else
+      database_config = @.getConfig( 'database' )
+
+    app.db = @setupDatabase( database_config )
     app.models = @setupModels( app.db, app )
 
     # pretty print the JSON
