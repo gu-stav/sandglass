@@ -50,6 +50,7 @@ class Sandglass
         password: process.env.DATABASE_PASSWORD
         host: process.env.DATABASE_HOST
         options:
+          host: process.env.DATABASE_HOST
           dialect: 'postgres'
           port: process.env.DATABASE_PORT
     else
