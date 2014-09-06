@@ -184,7 +184,7 @@ class Sandglass
           if @options.fixtures
             @setupFixtures( app_api )
         .then =>
-          app_api.listen( app_api.options.server.port )
+          app_api.listen( process.env.PORT || app_api.options.server.port )
           resolve( this )
 
   migrate: ( username, password, file ) ->
