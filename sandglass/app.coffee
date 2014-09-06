@@ -15,8 +15,22 @@ class Sandglass
       fixtures: process.env.FIXTURES || false
       migrations: process.env.MIGRATIONS || false
 
-    defaults.api      = @.getConfig( 'api' )
-    defaults.frontend = @.getConfig( 'frontend' )
+    if @.getEnviroment() is 'production'
+      defaults.api =
+        base: '/api/0.1'
+        server:
+          port: 3000
+
+      defaults.frontend =
+        host: node.env.FRONTEND_HOST
+        server:
+          port: 3001
+        dateFormatDateTime: 'DD.MM.YYYY HH:mm:ss'
+        dateFormatDate: 'DD.MM.YYYY'
+        dateFormatTime: 'HH:mm'
+    else
+      defaults.api      = @.getConfig( 'api' )
+      defaults.frontend = @.getConfig( 'frontend' )
 
     @options = defaults
 
