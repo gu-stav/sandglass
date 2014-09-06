@@ -1,0 +1,8 @@
+{
+  "development": {
+    "base": "/api/0.1",
+    "server": {
+      "port": "3000"
+    }
+  }
+}

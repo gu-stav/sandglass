@@ -3,4 +3,3 @@ node_modules/
 sandglass/static/dist/
 sandglass/static/bower/
 *.sublime-workspace
-config-*.json
