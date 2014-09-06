@@ -1,6 +1,10 @@
 moment = require( 'moment' )
+
 # TODO
-config = require( '../../config-frontend.json' ).development
+config =
+  dateFormatDateTime: 'DD.MM.YYYY HH:mm:ss'
+  dateFormatDate: 'DD.MM.YYYY'
+  dateFormatTime: 'HH:mm'
 
 getFormat = ( type ) ->
   if not type
