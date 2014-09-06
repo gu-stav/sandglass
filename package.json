@@ -16,6 +16,7 @@
     "inflection": "^1.4.2",
     "jade": "^1.6.0",
     "lodash": "^2.4.1",
+    "moment": "^2.8.3",
     "pg": "^3.4.2",
     "restler": "^3.2.2",
     "sequelize": "^2.0.0-dev13"
