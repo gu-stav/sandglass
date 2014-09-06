@@ -1,17 +1,13 @@
 {
   "name": "sandglass",
-  "version": "0.0.0",
-  "description": "",
-  "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "None",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "Gustav Pursche <gustavpursche@gmail.com>",
   "dependencies": {
     "bcrypt": "^0.8.0",
     "bluebird": "^2.3.2",
     "body-parser": "^1.7.0",
+    "coffee-script": "^1.8.0",
     "cookie-parser": "^1.3.2",
     "express": "^4.8.8",
     "inflection": "^1.4.2",
