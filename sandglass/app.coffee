@@ -22,7 +22,7 @@ class Sandglass
           port: 3000
 
       defaults.frontend =
-        host: node.env.FRONTEND_HOST
+        host: process.env.FRONTEND_HOST
         server:
           port: 3001
         dateFormatDateTime: 'DD.MM.YYYY HH:mm:ss'
