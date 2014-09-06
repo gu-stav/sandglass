@@ -1,32 +1,35 @@
 _ = require( 'lodash' )
 date = require( '../utils/date' )
-decode = require( '../utils/url' ).decode
-encode = require( '../utils/url' ).encode
 express = require( 'express' )
 moment = require( 'moment' )
 Promise = require( 'bluebird' )
 Restclient = require( '../utils/restclient' )
+urllib = require( 'url' )
 
 module.exports = ( app ) ->
   sandglass = new Restclient( app )
 
   router = express.Router()
     .get '/', [ app.sessionAuth ], ( req, res, next ) ->
-      if not req.param( 'from' )
+      parsed_request_url = urllib.parse( req.url, true )
+      from = parsed_request_url.query.from
+      tp = parsed_request_url.query.to
+
+      if not from
         from = moment().subtract( 1, 'weeks' )
       else
-        from = date.fromString( decode( req.param( 'from' ) ), 'Date' )
+        from = date.fromString( from, 'Date' )
 
-      if not req.param( 'to' )
+      if not to
         to = moment()
       else
-        to = date.fromString( decode( req.param( 'to' ) ), 'Date' )
+        to = date.fromString( to, 'Date' )
 
       req_data = headers: req.headers
 
       get_data =
-        from: encode( date.format( from ) )
-        to: encode( date.format( to ) )
+        from: date.format( from )
+        to: date.format( to )
 
       getTemplateData = () ->
         week_ahead = to.clone().add( 1, 'weeks' )
@@ -41,12 +44,18 @@ module.exports = ( app ) ->
         week_ahead_url = date.format( week_ahead, 'Date' )
         week_ahead_start_url = date.format( week_ahead_start, 'Date' )
 
+        from_to =
+          from: week_back_url
+          to: week_back_end_url
+
+        from_to_ahead =
+          from: week_ahead_start_url
+          to: week_ahead_url
+
         template_data =
           title:        'Tracking'
-          prev_link:    '/?from=' + encode( week_back_url ) +
-                        '&to=' + encode( week_back_end_url )
-          next_link:    '/?from=' + encode( week_ahead_start_url ) +
-                        '&to=' + encode( week_ahead_url )
+          prev_link:    '/' + urllib.format( query: from_to )
+          next_link:    '/' + urllib.format( query: from_to_ahead )
           showing_from: date.format( from, 'Date' )
           showing_to:   date.format( to, 'Date' )
 
