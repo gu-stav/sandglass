@@ -42,7 +42,21 @@ class Sandglass
     require( '../config-' + index + '.json' )[ @.getEnviroment() ]
 
   # returns database-connection object
-  setupDatabase: ( opt ) ->
+  setupDatabase: () ->
+    if @.getEnviroment() is 'production'
+      opt =
+        name: process.env.DATABASE_NAME
+        username: process.env.DATABASE_USER
+        password: process.env.DATABASE_PASSWORD
+        host: process.env.DATABASE_HOST
+        options:
+          dialect: 'postgres'
+          port: process.env.DATABASE_PORT
+    else
+      opt = @.getConfig( 'database' )
+
+    console.log( opt )
+
     new Sequelize( opt.name,
                    opt.username,
                    opt.password,
@@ -92,19 +106,7 @@ class Sandglass
   setupAPI: ( app ) ->
     app.options = @options.api
 
-    if @.getEnviroment() is 'production'
-      database_config =
-        name: process.env.DATABASE_NAME
-        username: process.env.DATABASE_USER
-        password: process.env.DATABASE_PASSWORD
-        host: process.env.DATABASE_HOST
-        options:
-          dialect: 'postgres'
-          port: process.env.DATABASE_PORT
-    else
-      database_config = @.getConfig( 'database' )
-
-    app.db = @setupDatabase( database_config )
+    app.db = @setupDatabase()
     app.models = @setupModels( app.db, app )
 
     # pretty print the JSON
