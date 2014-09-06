@@ -12,8 +12,7 @@ module.exports = ( app ) ->
   router = express.Router()
     .get '/', [ app.sessionAuth ], ( req, res, next ) ->
       parsed_request_url = urllib.parse( req.url, true )
-      from = parsed_request_url.query.from
-      tp = parsed_request_url.query.to
+      {from, to} = parsed_request_url.query
 
       if not from
         from = moment().subtract( 1, 'weeks' )

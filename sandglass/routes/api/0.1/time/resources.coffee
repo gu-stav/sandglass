@@ -1,4 +1,4 @@
-JSONController = require( '../../../../utils/controller' ).JSONController
+{JSONController} = require( '../../../../utils/controller' )
 errors = require( '../../../../errors/index' )
 express = require( 'express' )
 inflection = require( 'inflection' )
@@ -65,7 +65,7 @@ module.exports = ( app ) ->
             if next_part and
               promise_data.push( [ 'get', 'get' ] )
             else
-              promise_data.push( [ method, 'get' ] )
+              promise_data.push( [ method, req_method ] )
 
             if next_part
               # is not a valid model, so must be an identifier
